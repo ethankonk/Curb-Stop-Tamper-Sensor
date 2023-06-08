@@ -11,7 +11,7 @@
 // radio stuff <----- IMPORTANT ----->
 #define TRANSMIT 0;
 #define LISTEN 1;
-RF24 radio(7,8);
+inline RF24 radio(7,8);
 
 inline const byte address[6] = "00001";
 inline boolean radioMode = TRANSMIT;                   // false: transmitting | true: listening
@@ -36,7 +36,7 @@ inline payloadtype Message;
 inline unsigned long lastSignalMillis = 0;
 
 payloadtype updateRF(const byte address[]);
-boolean sendPacket(const byte address[], char msg_packet[])
+boolean sendPacket(const byte address[], char msg_packet[]);
 void DumpDatabase();
 
 #endif  /* NRTF_LIB_H */

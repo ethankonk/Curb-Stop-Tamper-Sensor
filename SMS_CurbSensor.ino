@@ -39,6 +39,7 @@ Water Curb Box Sensor
 #define CantArm 10
 
 
+
 // MISC. variables
 String response = "";
 
@@ -50,7 +51,7 @@ void setup() {
   Serial1.begin(115200);                          // initialize the SIM7600 module (Somehow automatically on Serial1)
 
   if(!radio.begin()){SerialUSB.println("Radio failed to start");}
-  radio.setDataRate(RF24_1MBPPS);                 // set high data rate for longer distance.
+  radio.setDataRate(RF24_1MBPS);                 // set high data rate for longer distance.
   radio.setPALevel(RF24_PA_HIGH);  
 
   pinMode(LTE_RESET_PIN, OUTPUT);                 // bunch of initialization stuff 
