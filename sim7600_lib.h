@@ -43,17 +43,13 @@ String sendCMD(String cmd, const int timeout, boolean debug);
 String getYN(int time, boolean debug);
 String getDateTime(boolean debug);
 String CurrConfig(Sensor device, boolean debug);
-
 Sensor ReqCommand(String cmd, Sensor device, boolean debug);
 Sensor AlarmOn(Sensor device, boolean debug);
 Sensor Disarm(Sensor device, boolean debug);
 Sensor ChangeConfig(Sensor device, boolean debug);
-
 boolean checkSMS(String message, int slot, boolean debug);
-
+boolean sendSMS(String message);
 int getID(String message, boolean debug);
-
-void sendSMS(String message);
 void clearSMS(boolean debug);
 void Status(Sensor device, boolean debug);
 void Help(boolean debug);

@@ -10,7 +10,10 @@
 /*Sends SMS message too phone*/
 // parameters: 
 //  - String message
-void sendSMS(String message){
+boolean sendSMS(String message){
+  unsigned int timeout = 10000;
+  unsigned long int time = millis();
+  timeout = time + timeout;
 
   sendCMD(cmd, 1000, DEBUG);                                    // sends " AT+CMGS= "+12269357857" " (Will have to make function to change phone#)
   delay(100);
@@ -20,9 +23,14 @@ void sendSMS(String message){
   Serial1.write(26);                                            // ASCII code for Ctrl-Z
 
   String serial = "";
-  while(serial.indexOf("+CMGS: ") < 0){                         // delay that just makes the code work
-    if(Serial1.available())
+  while((serial.indexOf("+CMGS: ") < 0) && (serial.indexOf("ERROR") < 0)){                         // delay that just makes the code work
+    if(Serial1.available())git 
       serial += char(Serial1.read());
+    delay(1);
+    if(timeout < millis()){
+      SerialUSB.println("VERY POOR CONNECTION!");
+      timeout += 10000;
+    }
   }
 
   SerialUSB.println(serial);
@@ -32,14 +40,15 @@ void sendSMS(String message){
     response += char(Serial1.read());
 
 
-  if(DEBUG){                                                    // debugging code 
-    if(response.indexOf("ERROR") != -1){
+  if(response.indexOf("ERROR") != -1){
+    if (DEBUG)
       SerialUSB.println(response);
-      SerialUSB.println("Failed to send message");
+    SerialUSB.println("Failed to send message");
+    return false;
     }
     else
       SerialUSB.println("Message sent successfully");
-  }
+    return true;
 }
 
 
@@ -642,7 +651,7 @@ void Alarm(Sensor device, boolean debug){
       return;
     }
 
-    if(count == 5000){
+    if(count == 1800000){
       sendSMS("<<ALERT>>\nDevice ID: "+ String(device.ID) + " has been tampered with!\nInstall Address: "+ device.name +
               "\nSensors Triggered: \nDate/Time: "+ device.datetime +"\nDevice Status: "+ device.status+ "\n\nTo stop alerts please type \"OK\"");
       count = 0;
