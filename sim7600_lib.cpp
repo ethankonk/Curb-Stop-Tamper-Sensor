@@ -6,6 +6,7 @@
 #include "sim7600_lib.h"
 
 
+
 /*Sends SMS message too phone*/
 // parameters: 
 //  - String message
@@ -40,6 +41,8 @@ void sendSMS(String message){
       SerialUSB.println("Message sent successfully");
   }
 }
+
+
 
 /*Reads SMS message comming from phone. NEEDS TO BE USED IN UpdateSMS()*/
 // parameters:
@@ -100,6 +103,8 @@ String readSMS(const int timeout, int slot, boolean debug){
   return "";
 }
 
+
+
 /*Clears all old SMS messages*/
 // parameters:
 //  - debug, debugging purposes
@@ -134,6 +139,8 @@ void clearSMS(boolean debug){
   }//for
 }
 
+
+
 /*Checks for any new SMS messages. Looks for new message prompt. Needs to be put in a loop.*/
 // parameters:
 //  - mode, dictates what kind of return the function will send.
@@ -152,15 +159,12 @@ String updateSMS(int mode, boolean debug){
       
       /*DEBBUGGING*/
       if(debug)
-        SerialUSB.write(*bufPtr);
-      
+        SerialUSB.write(*bufPtr); 
       
       delay(1);
-
     } while((*bufPtr++ != '\n') && (Serial1.available()));         // reads until a new line or until there is nothing left to read.
 
     *bufPtr = 0;
-
     if (1 == (sscanf(buffer, "+CMTI: \"SM\",%d", &slot))){         // looks for new message prompt.
       
       /*DEBUGGING*/
@@ -169,9 +173,7 @@ String updateSMS(int mode, boolean debug){
         SerialUSB.println(slot);
       }
 
-      message = readSMS(1000, slot, DEBUG);                         // if found, calls readSMS and stores messsage in message variable.
-      
-
+      message = readSMS(1000, slot, DEBUG);                         // if found, calls readSMS and stores messsage in message variable.      
       if(mode == 0){                                                // mode 0.
         if(!checkSMS(message, slot,DEBUG)){                         // WILL CHANGE ONCE PROTOTYPE IS DONE
           
@@ -190,11 +192,11 @@ String updateSMS(int mode, boolean debug){
     if(debug)
       SerialUSB.write(bufPtr);
     
-
   }//if
   Serial1.flush();                                                  // flush SIM7600 Serial.
   return "";                                                        // return nothing if new message notif not found.
 }
+
 
 
 /*Sends command too SIM7600 Serial*/
@@ -224,6 +226,8 @@ String sendCMD(String cmd, const int timeout, boolean debug){
     return response;                                                // returns SIM7600 response for error handeling purposes.
 }
 
+
+
 /*Looks through SMS message for certain prompts. WILL NEED TO MODIFY*/
 // parameters: 
 //  - message, message parsed from the user's SMS.
@@ -236,13 +240,11 @@ boolean checkSMS(String message, int slot, boolean debug){
   
   if(message.indexOf("s") == 0){
     ID = getID(message, debug);
-
     if(ID == -1)
       return false;
     
     message.remove(0,3);
     SerialUSB.println("CMD Type: "+ message);
-
     
     //input is 0
     if(message.indexOf("status") == 0){                                      // checks for "status" cmd. 
@@ -255,7 +257,6 @@ boolean checkSMS(String message, int slot, boolean debug){
       return true;
     }//if
 
-
       // input is 1
     else if(message.indexOf("configure") == 0){                           // checks for "configure" cmd.
 
@@ -265,8 +266,7 @@ boolean checkSMS(String message, int slot, boolean debug){
 
       device[ID-1] = ChangeConfig(device[ID-1], DEBUG);                      // calls 
       return true;
-    } 
-      
+    }      
       
       // input is 2
     else if(message.indexOf("disarm") == 0){                               // checks for "2".
@@ -279,7 +279,6 @@ boolean checkSMS(String message, int slot, boolean debug){
       return true;
     }
 
-
       //input is 3
     else if(message.indexOf("3") == 0){                               // checks for "3".
       /*DEBUGGING*/
@@ -288,7 +287,6 @@ boolean checkSMS(String message, int slot, boolean debug){
       device[0] = AlarmOn(device[0], DEBUG);
       return true;
     }
-
 
       // input is not on list. 
     else{
@@ -315,11 +313,12 @@ boolean checkSMS(String message, int slot, boolean debug){
       SerialUSB.println("NOT AN OPTION");
 
     message.trim();
-
     sendSMS("\""+ message +"\" is not a known command. Please type \"help\" for a list of commands.");    
     return false;
   }// else
 }
+
+
 
 /*  Gets the status of specified device. 
     NEED TO PRINT MORE STATUS STUFF. **CHANGE THIS LATER**
@@ -358,8 +357,6 @@ Sensor ChangeConfig(Sensor device, boolean debug){
   }
 
   sendSMS("----- Configuring s"+ String(device.ID) +" -----\nIF LEFT UNCONFIGURED FOR MORE THAN 10 MINUTES, S"+ String(device.ID) +" WILL POWER OFF.");
-
-
   while(time > millis() || loop){
 
     sendSMS("What is the address of the installation of s"+ String(device.ID) +"?");
@@ -419,6 +416,8 @@ Sensor ChangeConfig(Sensor device, boolean debug){
   return device;
 }//function
 
+
+
 /*  Pushes the config made by the user and returns 
     message to send to user by SMS. 
     SAME CHANGES TO BE MADE                               */
@@ -428,6 +427,8 @@ String CurrConfig(Sensor device, boolean debug){
             +"\nConductivity Sensor = "+ (device.conductivity ? "ON" : "OFF"));
   return message;
 }// function
+
+
 
 /*  Sets the device to command requesting mode which 
     just waits for the user to tell the device what state
@@ -458,6 +459,8 @@ Sensor ReqCommand(String cmd, Sensor device, boolean debug){
 
 }
 
+
+
 /*  Sets the device to ALARMING mode.
     SAME CHANGES TO BE MADE                               */
 Sensor AlarmOn(Sensor device, boolean debug){
@@ -469,6 +472,8 @@ Sensor AlarmOn(Sensor device, boolean debug){
   return device;
 
 }
+
+
 
 Sensor Disarm(Sensor device, boolean debug){
   String message;
@@ -503,7 +508,6 @@ Sensor Disarm(Sensor device, boolean debug){
   return device;
 }
 
-boolean updateRF(Sensor device, boolean debug);
 
 
 /*Gives all devices an ID*/ 
@@ -541,6 +545,7 @@ String getDateTime(boolean debug){
 }
 
 
+
 int getID(String message, boolean debug){
   int ID;
 
@@ -555,6 +560,7 @@ int getID(String message, boolean debug){
   sendSMS("s"+ String(ID) +" is not a device!");
   return -1;
 }
+
 
 
 String getYN(int time, boolean debug){
@@ -583,6 +589,8 @@ String getYN(int time, boolean debug){
   return "NORESPONSE";
 }
 
+
+
 /*OLD FUNCTION FOR GETTING READYING THE CURB UNIT*/
 // boolean getReadyInstall(Sensor device, boolean debug){
 //   long int time = millis();
@@ -610,6 +618,7 @@ String getYN(int time, boolean debug){
 // }
 
 
+
 void Help(boolean debug){
   sendSMS("----- Help List -----");  
   sendSMS("Command Type: status\n USAGE EXAMPLE: s# status");
@@ -617,6 +626,7 @@ void Help(boolean debug){
   sendSMS("Command Type: disarm\n USAGE EXAMPLE: s# disarm");
   sendSMS("Type \"help\" if you ever need this list of commands again.");
 }
+
 
 
 void Alarm(Sensor device, boolean debug){
@@ -642,6 +652,7 @@ void Alarm(Sensor device, boolean debug){
   delay(1);
   }//while
 }
+
 
 
 void Example(String message, boolean debug){

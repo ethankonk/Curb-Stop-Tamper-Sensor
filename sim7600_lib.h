@@ -41,7 +41,6 @@ String CurrConfig(Sensor device, boolean debug);
 Sensor ReqCommand(String cmd, Sensor device, boolean debug);
 Sensor AlarmOn(Sensor device, boolean debug);
 Sensor Disarm(Sensor device, boolean debug);
-boolean updateRF(Sensor device, boolean debug);
 String getDateTime(boolean debug);
 int getID(String message, boolean debug);
 String getYN(int time, boolean debug);
