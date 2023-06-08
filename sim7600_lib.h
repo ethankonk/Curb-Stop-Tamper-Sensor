@@ -3,6 +3,14 @@
 #define SIM7600_LIB_H
 #define DEBUG true
 
+// constants for module status and sensor status. 
+#define OFF 0
+#define ON 1
+#define TRIGGERED 2
+#define FAILED 3
+#define INACTIVE 0
+#define ACTIVE 1
+
 #include <string.h>
 #include <stdio.h>
 #include <Arduino.h>
@@ -17,12 +25,12 @@ inline char buffer[64];                                  //For notifications
   struct Sensor{
     int ID = 0;
     String name = "";
-    String status = "INACTIVE";
+    String status = "INACTIVE"; // CHANGE SOON
     String state = "";
     String datetime = "";
-    int tilt = 0;
-    int light = 0;
-    int conductivity = 0;
+    int tilt = OFF;
+    int light = OFF;
+    int conductivity = OFF;
     int RFid = 0;
     int RFaddress = 0;
     int configured = 0;

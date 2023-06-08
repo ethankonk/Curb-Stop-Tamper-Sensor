@@ -8,7 +8,28 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-// radio stuff <----- IMPORTANT ----->
+// constants for different sensor to controller message types.
+#define STATUS 0
+#define ReqParms 1
+#define ReqCmd 2
+#define ALARM 3
+#define Armed 4     
+
+// constants for different controller to sensor message types.
+#define ReqStatus 0
+#define LoadParms 1
+#define GoToArm 2
+#define GoSilent 3
+#define GoToSleep 4
+#define Acknowledge 5
+
+// constants for module status and sensor status. 
+#define OFF 0
+#define ON 1
+#define TRIGGERED 2
+#define FAILED 3
+
+// radio stuff
 #define TRANSMIT 0;
 #define LISTEN 1;
 inline RF24 radio(7,8);
