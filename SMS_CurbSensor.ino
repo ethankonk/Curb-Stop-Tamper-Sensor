@@ -24,22 +24,6 @@ Water Curb Box Sensor
 // debug toggle
 #define DEBUG true
 
-
-// device state constants
-#define NullState 0
-#define Asleep 1
-#define Connecting 2
-#define WaitForCmd 3
-#define Arming 4
-#define Armed 5
-#define Alarming 6
-#define CommsFail 7
-#define Configured 8
-#define AmSilent 9
-#define CantArm 10
-
-
-
 // MISC. variables
 String response = "";
 
