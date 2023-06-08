@@ -7,7 +7,6 @@
 #include "NRTF_lib.h"
 
 
-
 /*Sends SMS message too phone*/
 // parameters: 
 //  - String message
@@ -114,21 +113,19 @@ void clearSMS(boolean debug){
   String response = "";
 
   for(int i = 0; i <= 49; i++){                                 // clears all 50 stored messages.
-    CMD = "AT+CMGD=" + String(i);
-    
+    CMD = "AT+CMGD=" + String(i);    
     sendCMD(CMD, 10, debug);
-    //Serial1.println(CMD);
-    
+    //Serial1.println(CMD);    
     delay(1);
     
     while (Serial1.available()){
-          char c = Serial1.read();
-          response += c;
+      char c = Serial1.read();
+      response += c;
     }//while
 
     if(response.indexOf("ERROR") != -1){                        // checks for errors in +CMGD cmd
       SerialUSB.println("Failed to clear messages");
-      while(1){}                                                // *NEED TO CHANGE THIS TO SOMETHING
+      return;
     }//if
     
     if (debug){                                                 // for debugging
@@ -138,7 +135,7 @@ void clearSMS(boolean debug){
       }//while
     }//if
   }//for
-}
+}//function
 
 
 
@@ -281,11 +278,11 @@ boolean checkSMS(String message, int slot, boolean debug){
     }
 
       //input is 3
-    else if(message.indexOf("3") == 0){                               // checks for "3".
+    else if(message.indexOf("arm") == 0){                               // checks for "alarming"
       /*DEBUGGING*/
       if(debug)
         SerialUSB.println("SENDING CODE 3");
-      device[0] = AlarmOn(device[0], DEBUG);
+      device[ID-1] = AlarmOn(device[ID-1], DEBUG);
       return true;
     }
 
@@ -466,9 +463,10 @@ Sensor ReqCommand(String cmd, Sensor device, boolean debug){
     SAME CHANGES TO BE MADE                               */
 Sensor AlarmOn(Sensor device, boolean debug){
   String message;
-  sendSMS("Device set to ALARM.");
+  sendSMS("s"+ String(device.ID) +" is now ARMED.");
 
   device.status = "ACTIVE";
+  device.state = "ARMED";
   
   return device;
 

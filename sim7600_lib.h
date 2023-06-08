@@ -29,26 +29,30 @@ inline char buffer[64];                                  //For notifications
   };
 inline Sensor device[8];
 
-void sendSMS(String message);
 String readSMS(const int timeout, int slot, boolean debug);
-void clearSMS(boolean debug);
 String updateSMS(int mode, boolean debug);
 String sendCMD(String cmd, const int timeout, boolean debug);
-boolean checkSMS(String message, int slot, boolean debug);
-void Status(Sensor device, boolean debug);
-Sensor ChangeConfig(Sensor device, boolean debug);
+String getYN(int time, boolean debug);
+String getDateTime(boolean debug);
 String CurrConfig(Sensor device, boolean debug);
+
 Sensor ReqCommand(String cmd, Sensor device, boolean debug);
 Sensor AlarmOn(Sensor device, boolean debug);
 Sensor Disarm(Sensor device, boolean debug);
-String getDateTime(boolean debug);
+Sensor ChangeConfig(Sensor device, boolean debug);
+
+boolean checkSMS(String message, int slot, boolean debug);
+
 int getID(String message, boolean debug);
-String getYN(int time, boolean debug);
-// boolean getReadyInstall(Sensor device, boolean debug);
+
+void sendSMS(String message);
+void clearSMS(boolean debug);
+void Status(Sensor device, boolean debug);
 void Help(boolean debug);
 void Alarm(Sensor device, boolean debug);
 void Example(String message, boolean debug);
 void setDeviceID(boolean debug);
+// boolean getReadyInstall(Sensor device, boolean debug);
 
 
 #endif /* SIM7600_LIB_H */
