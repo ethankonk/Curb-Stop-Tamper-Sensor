@@ -379,7 +379,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       break;
 
     if(userResponse.indexOf("y") == 0)
-      device.tilt = 1;
+      device.tilt = ON;
     sendSMS("OK.");                                                          //THIS "OK" STUFF MIGHT NEED TO CHANGE!
     delay(100);
     
@@ -389,7 +389,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       break;
     
     if(userResponse.indexOf("y") == 0)
-      device.light = 1;
+      device.light = ON;
     sendSMS("OK.");
     delay(100);
 
@@ -399,7 +399,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       break;
 
     if(userResponse.indexOf("y") == 0)
-      device.conductivity = 1;
+      device.conductivity = ON;
     sendSMS("OK.");
     delay(100);
 
