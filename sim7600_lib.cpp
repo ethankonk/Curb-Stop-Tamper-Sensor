@@ -24,7 +24,7 @@ boolean sendSMS(String message){
 
   String serial = "";
   while((serial.indexOf("+CMGS: ") < 0) && (serial.indexOf("ERROR") < 0)){                         // delay that just makes the code work
-    if(Serial1.available())git 
+    if(Serial1.available()) 
       serial += char(Serial1.read());
     delay(1);
     if(timeout < millis()){
@@ -332,11 +332,15 @@ boolean checkSMS(String message, int slot, boolean debug){
 */
 void Status(Sensor device, boolean debug){
   String message;
-  String config;
-  device.datetime = getDateTime(debug);                                         // going to change.
+  String config;                                        // going to change.
   config = CurrConfig(device, debug);
 
-  message = ("----- Status -----\nDevice ID: "+ String(device.ID) +"\nName: "+ device.name +"\nStatus: "+ device.status +"\nLast Updated: "+ device.datetime);
+  message = ("----- Status -----\nDevice ID: "+ String(device.ID) 
+            +"\nName: "+ device.name 
+            +"\nStatus: "+ device.status 
+            +"\nLast Updated: "+ device.datetime
+            +"\nBattery Level: "+ device.BatLevel
+            );
   sendSMS(message);
   SerialUSB.println(message);
   
@@ -456,10 +460,6 @@ Sensor ReqCommand(String cmd, Sensor device, boolean debug){
   if(message.indexOf("sleep") == 0 || message.indexOf("Sleep") == 0){
     sendSMS("Device set to SLEEP.");
     device.status = "INACTIVE";
-    device.RFaddress = 0;
-    device.RFid = 0;
-    device.name = "";
-    device.ID = -1;
   }
 
   return device;
@@ -475,7 +475,7 @@ Sensor AlarmOn(Sensor device, boolean debug){
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
 
   device.status = "ACTIVE";
-  device.state = "ARMED";
+  device.state = Armed;
   
   return device;
 
@@ -493,7 +493,7 @@ Sensor Disarm(Sensor device, boolean debug){
     message = getYN(1000, debug);
 
     if(message.indexOf("y") == 0){
-      device.state = "NullState";
+      device.state = NullState;
       device.status = "INACTIVE";
       device.light = 0;
       device.tilt = 0;
@@ -670,4 +670,15 @@ void Example(String message, boolean debug){
   
   else if(message.indexOf("configure") == 0)
     sendSMS("An example of how the \"configure\" command is used is:\ns4 configure\n  - The \"4\" being the ID of the unit you would like to configure.");
+}
+
+
+
+Sensor storeStatus(Sensor device){
+  device.datetime = getDateTime(DEBUG);
+  device.state = Message.State;
+  device.BatLevel = Message.BatLevel;
+  device.Sensor1 = Message.Sensor1;
+  device.Sensor2 = Message.Sensor2;
+  device.Sensor3 = Message.Sensor3;
 }

@@ -43,8 +43,8 @@
 #define CantArm 10
 
 // radio stuff
-#define TRANSMIT 0;
-#define LISTEN 1;
+#define TRANSMIT 0
+#define LISTEN 1
 inline RF24 radio(7,8);
 
 inline const byte address[6] = "00001";
@@ -69,7 +69,7 @@ inline payloadtype payload;
 inline payloadtype Message;
 inline unsigned long lastSignalMillis = 0;
 
-payloadtype updateRF(const byte address[]);
+boolean updateRF(const byte address[]);
 boolean sendPacket(const byte address[], char msg_packet[]);
 void DumpDatabase();
 

@@ -89,10 +89,27 @@ void setup() {
   delay(100);
 }
 
-
+int count = 0;
 void loop() {
   updateSMS(0, DEBUG);
+
+  // if (count == 150){
+
+  //   for(int i=0; i<3; i++){
+  //     if(device[i].configured)
+  //       if(updateRF(device[i].RFaddress))
+  //        device[i] = storeStatus(device[i]);
+  
+  //        if(device[i].state == AlarmOn)
+  //          Alarm(device[i], DEBUG);
+         
+  //   }
+
+  //   count = 0;
+  // }
+  
   delay(100);
+  count++;
 }
 
 

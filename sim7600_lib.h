@@ -11,6 +11,19 @@
 #define INACTIVE 0
 #define ACTIVE 1
 
+// device state constants
+#define NullState 0
+#define Asleep 1
+#define Connecting 2
+#define WaitForCmd 3
+#define Arming 4
+#define Armed 5
+#define Alarming 6
+#define CommsFail 7
+#define Configured 8
+#define AmSilent 9
+#define CantArm 10
+
 #include <string.h>
 #include <stdio.h>
 #include <Arduino.h>
@@ -26,14 +39,17 @@ inline char buffer[64];                                  //For notifications
     int ID = 0;
     String name = "";
     String status = "INACTIVE"; // CHANGE SOON
-    String state = "";
+    int state = NullState;
     String datetime = "";
     int tilt = OFF;
     int light = OFF;
     int conductivity = OFF;
-    int RFid = 0;
-    int RFaddress = 0;
+    char RFaddress[6] = "00000";
     int configured = 0;
+    int BatLevel = 0;
+    int Sensor1 = OFF;
+    int Sensor2 = OFF;
+    int Sensor3 = OFF;
   };
 inline Sensor device[8];
 
@@ -47,6 +63,7 @@ Sensor ReqCommand(String cmd, Sensor device, boolean debug);
 Sensor AlarmOn(Sensor device, boolean debug);
 Sensor Disarm(Sensor device, boolean debug);
 Sensor ChangeConfig(Sensor device, boolean debug);
+Sensor storeStatus(Sensor device);
 boolean checkSMS(String message, int slot, boolean debug);
 boolean sendSMS(String message);
 int getID(String message, boolean debug);
