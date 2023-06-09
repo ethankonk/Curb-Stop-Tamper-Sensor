@@ -47,9 +47,6 @@ inline char buffer[64];                                  //For notifications
     char RFaddress[6] = "00000";
     int configured = 0;
     int BatLevel = 0;
-    int Sensor1 = OFF;
-    int Sensor2 = OFF;
-    int Sensor3 = OFF;
   };
 inline Sensor device[8];
 

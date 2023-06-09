@@ -416,6 +416,12 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       break;
 
     if(userResponse.indexOf("n") == 0){
+      // loadPacket(device);
+      // if(!sendPacket(device.RFaddress)){
+      //   sendSMS("S"+ String(device.ID) +" Failed To Configure.");
+      //   return device;                                                   // IMPORTANT*** MAKE SURE TO CHANGE THIS PLEASE.
+      // }
+
       sendSMS("S"+ String(device.ID) +" Configured.");                   // IMPORTANT** MAKE SURE THIS PUSHES THE CONFIG TOO THE SENSOR
       device.configured = 1;                                             // VERY IMPORTANT LATER ^^^
       return device;
@@ -678,7 +684,7 @@ Sensor storeStatus(Sensor device){
   device.datetime = getDateTime(DEBUG);
   device.state = Message.State;
   device.BatLevel = Message.BatLevel;
-  device.Sensor1 = Message.Sensor1;
-  device.Sensor2 = Message.Sensor2;
-  device.Sensor3 = Message.Sensor3;
+  device.tilt = Message.Sensor1;
+  device.light = Message.Sensor2;
+  device.conductivity = Message.Sensor3;
 }

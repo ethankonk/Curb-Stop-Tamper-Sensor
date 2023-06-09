@@ -70,7 +70,8 @@ inline payloadtype Message;
 inline unsigned long lastSignalMillis = 0;
 
 boolean updateRF(const byte address[]);
-boolean sendPacket(const byte address[], char msg_packet[]);
+boolean sendPacket(char address[]);
+void loadPacket(Sensor device);
 void DumpDatabase();
 
 
