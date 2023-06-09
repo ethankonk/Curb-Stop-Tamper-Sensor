@@ -71,6 +71,7 @@ inline unsigned long lastSignalMillis = 0;
 
 boolean updateRF(const byte address[]);
 boolean sendPacket(char address[]);
+boolean pingRF(char address[]);
 void loadPacket(Sensor device);
 void DumpDatabase();
 
