@@ -3,13 +3,15 @@
 #define SIM7600_LIB_H
 #define DEBUG true
 
-// constants for module status and sensor status. 
+// constants for module status
+#define INACTIVE 0
+#define ACTIVE 1
+
+// constants for sensor status.
 #define OFF 0
 #define ON 1
 #define TRIGGERED 2
 #define FAILED 3
-#define INACTIVE 0
-#define ACTIVE 1
 
 // device state constants
 #define NullState 0
@@ -38,7 +40,7 @@ inline char buffer[64];                                  //For notifications
   struct Sensor{
     int ID = 0;
     String name = "";
-    String status = "INACTIVE"; // CHANGE SOON
+    int status = INACTIVE; // CHANGE SOON
     int state = NullState;
     String datetime = "";
     int tilt = OFF;

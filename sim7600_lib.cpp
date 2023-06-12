@@ -324,7 +324,7 @@ void Status(Sensor device, boolean debug){
 
   message = ("----- Status -----\nDevice ID: "+ String(device.ID) 
             +"\nName: "+ device.name 
-            +"\nStatus: "+ device.status 
+            +"\nStatus: "+ (device.status ? "ACTIVE" : "INACTIVE") 
             +"\nLast Updated: "+ device.datetime
             +"\nBattery Level: "+ device.BatLevel
             );
@@ -427,8 +427,12 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     SAME CHANGES TO BE MADE                               */
 String CurrConfig(Sensor device, boolean debug){
   String message;
-  message = ("S"+ String(device.ID) + " CURRENT SENSOR CONFIG:\n----- Config -----\nInstall Address: "+ device.name +"\nTilt Sensor = "+ (device.tilt ? "ON" : "OFF") + "\nLight Sensor = "+ (device.light ? "ON" : "OFF")
+  message = ("S"+ String(device.ID) 
+            +" CURRENT SENSOR CONFIG:\n----- Config -----\nInstall Address: "+ device.name 
+            +"\nTilt Sensor = "+ (device.tilt ? "ON" : "OFF") 
+            +"\nLight Sensor = "+ (device.light ? "ON" : "OFF")
             +"\nConductivity Sensor = "+ (device.conductivity ? "ON" : "OFF"));
+
   return message;
 }// function
 
@@ -447,12 +451,12 @@ Sensor ReqCommand(String cmd, Sensor device, boolean debug){
 
   if(message.indexOf("silent") == 0 || message.indexOf("Silent") == 0){
     sendSMS("Device set to SILENT.");                                     // *IMPORTANT* make this actually update state to silent mode
-    device.status = "SILENT";
+    device.status = INACTIVE;
   }
 
   if(message.indexOf("sleep") == 0 || message.indexOf("Sleep") == 0){
     sendSMS("Device set to SLEEP.");
-    device.status = "INACTIVE";
+    device.status = INACTIVE;
   }
 
   return device;
@@ -467,7 +471,7 @@ Sensor AlarmOn(Sensor device, boolean debug){
   String message;
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
 
-  device.status = "ACTIVE";
+  device.status = ACTIVE;
   device.state = Armed;
   
   return device;
@@ -487,7 +491,7 @@ Sensor Disarm(Sensor device, boolean debug){
 
     if(message.indexOf("y") == 0){
       device.state = NullState;
-      device.status = "INACTIVE";
+      device.status = INACTIVE;
       device.light = 0;
       device.tilt = 0;
       device.conductivity = 0;
