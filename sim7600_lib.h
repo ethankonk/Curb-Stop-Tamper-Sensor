@@ -50,8 +50,8 @@ inline char buffer[64];                                  //For notifications
   };
 inline Sensor device[8];
 
-String readSMS(const int timeout, int slot, boolean debug);
-String updateSMS(int mode, boolean debug);
+String readSMS(const int timeout, int slot);
+String updateSMS(int mode);
 String sendCMD(String cmd, const int timeout, boolean debug);
 String getYN(int time, boolean debug);
 String getDateTime(boolean debug);

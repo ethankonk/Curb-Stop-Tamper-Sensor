@@ -9,45 +9,44 @@
 
 /*Sends SMS message too phone*/
 // parameters: 
-//  - String message
+//  - message, message you want to send.
 boolean sendSMS(String message){
   unsigned int timeout = 10000;
   unsigned long int time = millis();
   timeout = time + timeout;
 
-  sendCMD(cmd, 1000, DEBUG);                                    // sends " AT+CMGS= "+12269357857" " (Will have to make function to change phone#)
+  sendCMD(cmd, 1000, DEBUG);                                                // sends " AT+CMGS= "+12269357857" " (Will have to make function to change phone#)
   delay(100);
 
-  Serial1.print(message);                                       // print message to send to SIM7600 Serial
+  Serial1.print(message);                                                   // print message to send to SIM7600 Serial
   delay(500);
-  Serial1.write(26);                                            // ASCII code for Ctrl-Z
+  Serial1.write(26);                                                        // ASCII code for Ctrl-Z
 
   String serial = "";
-  while((serial.indexOf("+CMGS: ") < 0) && (serial.indexOf("ERROR") < 0)){                         // delay that just makes the code work
+  while((serial.indexOf("+CMGS: ") < 0) && (serial.indexOf("ERROR") < 0)){  // loops until the message is confirm sent.
     if(Serial1.available()) 
       serial += char(Serial1.read());
     delay(1);
-    if(timeout < millis()){
-      SerialUSB.println("VERY POOR CONNECTION!");
+    if(timeout < millis()){                                                  
+      SerialUSB.print("\nVERY POOR CONNECTION!");
       timeout += 10000;
     }
   }
 
-  SerialUSB.println(serial);
+  if(DEBUG){SerialUSB.println(serial);}
 
   String response = "";
-  while(Serial1.available() && response.indexOf("OK") < 0)      // look for OK response
+  while(Serial1.available() && response.indexOf("OK") < 0)                  // look for OK response.
     response += char(Serial1.read());
 
 
   if(response.indexOf("ERROR") != -1){
-    if (DEBUG)
-      SerialUSB.println(response);
+    if(DEBUG){SerialUSB.println(response);}
     SerialUSB.println("Failed to send message");
     return false;
     }
-    else
-      SerialUSB.println("Message sent successfully");
+  else
+    SerialUSB.println("Message sent successfully");
     return true;
 }
 
@@ -58,7 +57,7 @@ boolean sendSMS(String message){
 //  - timeout, time the loop will wait before throwing up an error.
 //  - slot, message slot number. IMPORTANT FOR READING THE CORRECT MESSAGE.
 //  - debug, just to see whether to throw up the debug stuff.
-String readSMS(const int timeout, int slot, boolean debug){
+String readSMS(const int timeout, int slot){
 
   String response = "";
   String message = "";
@@ -66,32 +65,28 @@ String readSMS(const int timeout, int slot, boolean debug){
   int charCount = 0;
 
   delay(100);
-  Serial1.println(CMD);                                                         // prints cmd which prints out message received.
+  Serial1.println(CMD);                                                        // prints cmd which prints out message received.
   delay(100);
 
-  while((Serial1.available())){                                                 // finds first part of received message and reads it out.
+  while((Serial1.available())){                                                // finds first part of received message and reads it out.
     char c = Serial1.read();                                                    
-    if((c == '\n') && (response.indexOf("+CMGR: \"REC UNREAD\"") >= 0))         // parses out the junk part of message.
+    if((c == '\n') && (response.indexOf("+CMGR: \"REC UNREAD\"") >= 0))        // parses out the junk part of message.
       break;
 
     response += c;
     delay(1);
   }
 
-  /*DEBUGGING*/ 
-  if(debug){                                                                    // for debugging, prints out junk part of message.
-    SerialUSB.println(response);
-    SerialUSB.println("*****************");
-  }
+  if(DEBUG){SerialUSB.println(response);}                                      // for debugging, prints out junk part of message.
 
-  if(response.indexOf("OK") == -1) {
+  if(response.indexOf("OK") == -1) {                                           // if no message was received, only "OK" will be read.
     long int time = millis();
     boolean loop = true;
 
-    while ((time + timeout) > millis() && loop){                               // stores actual message sent by SMS into String message
+    while ((time + timeout) > millis() && loop){                               // stores actual message sent by SMS.
       while (Serial1.available()){
         char c = Serial1.read();
-        if((c == '\n')){                                                       // only reads message up to '\n'
+        if((c == '\n')){                                                       // only reads message up to the newline.
           loop = false;                                                        // breaks loop once message is read.
           break; 
         }
@@ -100,13 +95,13 @@ String readSMS(const int timeout, int slot, boolean debug){
         delay(1);
       }//while
     }//while
-    SerialUSB.println("New unread message: "+ message);                        // prints out message 
+    if(DEBUG){SerialUSB.println("New unread message: "+ message);}             // prints out message 
     
     return message; 
 
   }//if
   else
-    SerialUSB.println("No unread messages");
+    if(DEBUG){SerialUSB.println("No unread messages");}
 
   clearSMS(DEBUG);
   return "";
@@ -154,7 +149,7 @@ void clearSMS(boolean debug){
 //     mode = 0: Calls the checkSMS function.
 //     mode = 1: Returns the readSMS message.
 //  - debug, debugging stuff
-String updateSMS(int mode, boolean debug){
+String updateSMS(int mode){
   char* bufPtr = buffer;
   String message;
   
@@ -164,44 +159,36 @@ String updateSMS(int mode, boolean debug){
     do {                                                            // reads SIM7600 Serial.
       *bufPtr = Serial1.read(); 
       
-      /*DEBBUGGING*/
-      if(debug)
-        SerialUSB.write(*bufPtr); 
-      
+      if(DEBUG){SerialUSB.write(*bufPtr);} 
       delay(1);
     } while((*bufPtr++ != '\n') && (Serial1.available()));         // reads until a new line or until there is nothing left to read.
 
     *bufPtr = 0;
     if (1 == (sscanf(buffer, "+CMTI: \"SM\",%d", &slot))){         // looks for new message prompt.
       
-      /*DEBUGGING*/
-      if(debug){
+      if(DEBUG){
         SerialUSB.print("slot: ");
         SerialUSB.println(slot);
       }
 
-      message = readSMS(1000, slot, DEBUG);                         // if found, calls readSMS and stores messsage in message variable.      
-      if(mode == 0){                                                // mode 0.
-        if(!checkSMS(message, slot,DEBUG)){                         // WILL CHANGE ONCE PROTOTYPE IS DONE
-          
-          /*DEBUGGING*/
-          if(debug)
-            SerialUSB.println("NOT 0, 1, 2, 3");
-        }//if
+      message = readSMS(1000, slot);                               // if found, calls readSMS and stores messsage in message variable.
+
+      if(mode == 0){                                               // checks the message for command.
+        if(!checkSMS(message, slot,DEBUG))                         // WILL CHANGE ONCE PROTOTYPE IS DONE
+          if(DEBUG){SerialUSB.println("NOT 0, 1, 2, 3");}
       }//if
 
-      else if(mode == 1){                                           // mode 1.
+      else if(mode == 1){                                          // simply returns the message received.
         return message;
-      }//elseif
+      }//else if
     }//if
 
     /*DEBBUGGING*/
-    if(debug)
-      SerialUSB.write(bufPtr);
+    if(DEBUG){SerialUSB.write(bufPtr);}
     
   }//if
-  Serial1.flush();                                                  // flush SIM7600 Serial.
-  return "";                                                        // return nothing if new message notif not found.
+  Serial1.flush();                                                 
+  return "";                                                       // return nothing if new message notif not found.
 }
 
 
@@ -215,7 +202,7 @@ String sendCMD(String cmd, const int timeout, boolean debug){
     String response = "";
     Serial1.flush();
 
-    Serial1.println(cmd);                                           // prints requested command to SIM7600 Serial.
+    Serial1.println(cmd);                                           // prints command to SIM7600 Serial.
 
     long int time = millis();
     while ((time + timeout) > millis()){                            // reads any error or OK responses spat out from the SIM7600 Serial.
@@ -230,7 +217,7 @@ String sendCMD(String cmd, const int timeout, boolean debug){
         SerialUSB.print(response);
     }
 
-    return response;                                                // returns SIM7600 response for error handeling purposes.
+    return response;                                                // returns SIM7600 response for debugging.
 }
 
 
@@ -373,7 +360,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     sendSMS("What is the address of the installation of s"+ String(device.ID) +"?");
 
     while(userResponse.equals(""))
-      userResponse = updateSMS(1, debug);
+      userResponse = updateSMS(1);
 
     device.name = userResponse;
 
@@ -456,7 +443,7 @@ Sensor ReqCommand(String cmd, Sensor device, boolean debug){
   sendSMS("Type \"silent\" for silent mode or \"sleep\" for sleep mode");
   
   while(message == "")
-    message = updateSMS(1, debug);
+    message = updateSMS(1);
 
   if(message.indexOf("silent") == 0 || message.indexOf("Silent") == 0){
     sendSMS("Device set to SILENT.");                                     // *IMPORTANT* make this actually update state to silent mode
@@ -582,7 +569,7 @@ String getYN(int time, boolean debug){
   String response = "";
 
   while(time > millis()){
-    response = updateSMS(1, debug);
+    response = updateSMS(1);
 
     if(response.equals(""))
       continue;
@@ -650,7 +637,7 @@ void Alarm(Sensor device, boolean debug){
 
   while(!acknowledge && loops < 3){
     count++;
-    if(updateSMS(1, debug) != ""){
+    if(updateSMS(1) != ""){
       SerialUSB.println("Acknowledgement Received");
       sendSMS("ALERT ACKNOWLEDGED.");
       acknowledge = true;

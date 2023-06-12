@@ -91,7 +91,7 @@ void setup() {
 
 int count = 0;
 void loop() {
-  updateSMS(0, DEBUG);
+  updateSMS(0);
 
   // if (count == 150){
 
