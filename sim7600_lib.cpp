@@ -240,49 +240,30 @@ boolean checkSMS(String message, int slot, boolean debug){
     message.remove(0,3);
     SerialUSB.println("CMD Type: "+ message);
     
-    //input is 0
-    if(message.indexOf("status") == 0){                                      // checks for "status" cmd. 
-
-      /*DEBUGGING*/
-      if(debug)  
-        SerialUSB.println("SENDING STATUS");
-
-      Status(device[ID-1], DEBUG);                          // calls Status() which returns a devices' status.
+    if(message.indexOf("status") == 0){                                    // checks for "status" cmd. 
+      if(debug){SerialUSB.println("SENDING STATUS");}
+      Status(device[ID-1], DEBUG);                                        // calls Status() which returns a devices' status.
       return true;
     }//if
 
-      // input is 1
     else if(message.indexOf("configure") == 0){                           // checks for "configure" cmd.
-
-      /*DEBUGGING*/
-      if(debug)  
-        SerialUSB.println("SENDING CODE 1");
-
-      device[ID-1] = ChangeConfig(device[ID-1], DEBUG);                      // calls 
+      if(debug){SerialUSB.println("SENDING CODE 1");}
+      device[ID-1] = ChangeConfig(device[ID-1], DEBUG);                  // calls 
       return true;
     }      
       
-      // input is 2
     else if(message.indexOf("disarm") == 0){                               // checks for "2".
-
-      /*DEBUGGING*/
-      if(debug)
-        SerialUSB.println("SENDING CODE 2");
-
+      if(debug){SerialUSB.println("SENDING CODE 2");}
       device[ID-1] = Disarm(device[ID-1], DEBUG);
       return true;
     }
 
-      //input is 3
     else if(message.indexOf("arm") == 0){                               // checks for "alarming"
-      /*DEBUGGING*/
-      if(debug)
-        SerialUSB.println("SENDING CODE 3");
+      if(debug){SerialUSB.println("SENDING CODE 3");}
       device[ID-1] = AlarmOn(device[ID-1], DEBUG);
       return true;
     }
 
-      // input is not on list. 
     else{
       sendSMS("ERROR: Unknown command.\nPlease type \"help\" for list of valid commands.");
       return false;

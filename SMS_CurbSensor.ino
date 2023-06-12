@@ -41,14 +41,14 @@ String response = "";
 void setup() {
   setDeviceID(DEBUG);
 
-  SerialUSB.begin(115200);                        // initialize the USB serial port
-  Serial1.begin(115200);                          // initialize the SIM7600 module (Somehow automatically on Serial1)
+  SerialUSB.begin(115200);                                          // initialize the USB serial port.
+  Serial1.begin(115200);                                            // initialize the SIM7600 module (Hardwired to Serial1).
 
-  if(!radio.begin()){SerialUSB.println("Radio failed to start");}
-  radio.setDataRate(RF24_1MBPS);                 // set high data rate for longer distance.
+  if(!radio.begin()){SerialUSB.println("Radio failed to start");}   // initialize radio.
+  radio.setDataRate(RF24_1MBPS);                                    // set high data rate for longer distance.
   radio.setPALevel(RF24_PA_HIGH);  
 
-  pinMode(LTE_RESET_PIN, OUTPUT);                 // bunch of initialization stuff 
+  pinMode(LTE_RESET_PIN, OUTPUT);                                   // bunch of initialization stuff 
   digitalWrite(LTE_RESET_PIN, LOW);
 
   pinMode(LTE_PWRKEY_PIN, OUTPUT);
@@ -100,7 +100,7 @@ void loop() {
   //       if(updateRF(device[i].RFaddress))
   //        device[i] = storeStatus(device[i]);
   
-  //        if(device[i].state == AlarmOn)
+  //        if(device[i].state == Alarming)
   //          Alarm(device[i], DEBUG);
          
   //   }
