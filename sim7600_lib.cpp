@@ -506,12 +506,12 @@ void setDeviceID(boolean debug){
 
 
 
-String getDateTime(boolean debug){
+String getDateTime(){
   String date = "";
   int timeout = 1000;
   int count;
 
-  date = sendCMD("AT+CCLK?", 1000, debug);
+  date = sendCMD("AT+CCLK?", 1000, DEBUG);
   delay(100);
 
   if(date.indexOf("ERROR") != -1){
@@ -522,8 +522,7 @@ String getDateTime(boolean debug){
   date.remove(0, 25);
   date.remove(17, 20);
 
-  if (debug)
-    SerialUSB.println(date);
+  if (DEBUG){SerialUSB.println(date);}
 
   return date;
 }
@@ -652,7 +651,7 @@ void Example(String message, boolean debug){
 
 
 Sensor storeStatus(Sensor device){
-  device.datetime = getDateTime(DEBUG);
+  device.datetime = getDateTime();
   device.state = Message.State;
   device.BatLevel = Message.BatLevel;
   device.tilt = Message.Sensor1;
