@@ -498,11 +498,9 @@ Sensor Disarm(Sensor device, boolean debug){
 
 /*Gives all devices an ID*/ 
 void setDeviceID(boolean debug){
-  for(int i = 0; i < 8; i++){
+  for(int i = 0; i < 3; i++){
     device[i].ID = i+1;
-
-    if (debug)
-      SerialUSB.println("Device "+ String(i) +" ID: "+ String(device[i].ID));
+    if (debug){SerialUSB.println("Device "+ String(i) +" ID: "+ String(device[i].ID));}
   }
 }
 
@@ -540,7 +538,7 @@ int getID(String message, boolean debug){
   SerialUSB.println("ID: "+ message);
   ID = message.toInt();
 
-  if(0 < ID && ID < 8){
+  if(1 <= ID && ID <= 4){
     return ID;
   }
   sendSMS("s"+ String(ID) +" is not a device!");
@@ -555,14 +553,15 @@ String getYN(int time, boolean debug){
 
   while(time > millis()){
     response = updateSMS(1);
+    response.toLowerCase();
 
     if(response.equals(""))
       continue;
 
-    else if(response.lastIndexOf("y") == 0 || response.lastIndexOf("Y") == 0)
+    else if(response.indexOf("y") == 0)
       return "y";
 
-    else if(response.lastIndexOf("n") == 0 || response.lastIndexOf("N") == 0)
+    else if(response.indexOf("n") == 0)
       return "n";
 
     else{

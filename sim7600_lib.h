@@ -50,7 +50,7 @@ inline char buffer[64];                                  //For notifications
     int configured = 0;
     int BatLevel = 0;
   };
-inline Sensor device[8];
+inline Sensor device[4];
 
 String readSMS(const int timeout, int slot);
 String updateSMS(int mode);
