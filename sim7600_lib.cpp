@@ -240,25 +240,25 @@ boolean checkSMS(String message, int slot, boolean debug){
     message.remove(0,3);
     SerialUSB.println("CMD Type: "+ message);
     
-    if(message.indexOf("status") == 0){                                    // checks for "status" cmd. 
+    if(message.indexOf("status") == 0){                                  // checks for "status" cmd. 
       if(debug){SerialUSB.println("SENDING STATUS");}
-      Status(device[ID-1], DEBUG);                                        // calls Status() which returns a devices' status.
+      Status(device[ID-1], DEBUG);                                       // calls Status() which returns a devices' status.
       return true;
     }//if
 
-    else if(message.indexOf("configure") == 0){                           // checks for "configure" cmd.
+    else if(message.indexOf("configure") == 0){                          // checks for "configure" cmd.
       if(debug){SerialUSB.println("SENDING CODE 1");}
       device[ID-1] = ChangeConfig(device[ID-1], DEBUG);                  // calls 
       return true;
     }      
       
-    else if(message.indexOf("disarm") == 0){                               // checks for "2".
+    else if(message.indexOf("disarm") == 0){                             // checks for "2".
       if(debug){SerialUSB.println("SENDING CODE 2");}
       device[ID-1] = Disarm(device[ID-1], DEBUG);
       return true;
     }
 
-    else if(message.indexOf("arm") == 0){                               // checks for "alarming"
+    else if(message.indexOf("arm") == 0){                                // checks for "alarming"
       if(debug){SerialUSB.println("SENDING CODE 3");}
       device[ID-1] = AlarmOn(device[ID-1], DEBUG);
       return true;
@@ -300,15 +300,14 @@ boolean checkSMS(String message, int slot, boolean debug){
 */
 void Status(Sensor device, boolean debug){
   String message;
-  String config;                                        // going to change.
+  String config;                                                        // going to change.
   config = CurrConfig(device, debug);
 
   message = ("----- Status -----\nDevice ID: "+ String(device.ID) 
             +"\nName: "+ device.name 
-            +"\nStatus: "+ (device.status ? "ACTIVE" : "INACTIVE") 
+            +"\nStatus: "+ (device.status ? "ACTIVE" : "INACTIVE")
             +"\nLast Updated: "+ device.datetime
-            +"\nBattery Level: "+ device.BatLevel
-            );
+            +"\nBattery Level: "+ device.BatLevel);
   sendSMS(message);
   SerialUSB.println(message);
   
@@ -465,7 +464,9 @@ Sensor Disarm(Sensor device, boolean debug){
   String message;
   int x = 1;
 
-  sendSMS("----- DISARMING -----\nDevice: s"+ String(device.ID) +"\nAddress: "+ device.name + "\nAre you sure you would like to disarm s"+ String(device.ID) +"? (y or n)");
+  sendSMS("----- DISARMING -----\nDevice: s"+ String(device.ID) 
+         +"\nAddress: "+ device.name 
+         +"\nAre you sure you would like to disarm s"+ String(device.ID) +"? (y or n)");
 
   while(x){
     message = getYN(1000, debug);
@@ -628,8 +629,12 @@ void Alarm(Sensor device, boolean debug){
     }
 
     if(count == 1800000){
-      sendSMS("<<ALERT>>\nDevice ID: "+ String(device.ID) + " has been tampered with!\nInstall Address: "+ device.name +
-              "\nSensors Triggered: \nDate/Time: "+ device.datetime +"\nDevice Status: "+ device.status+ "\n\nTo stop alerts please type \"OK\"");
+      sendSMS("<<ALERT>>\nDevice ID: "+ String(device.ID) + " has been tampered with!\nInstall Address: "+ device.name 
+             +"\nSensors Triggered:\n"
+             +((device.tilt=TRIGGERED) ? "  - TILT SENSOR\n" : "") 
+             +((device.light=TRIGGERED) ? "  - LIGHT SENSOR\n" : "")
+             +((device.conductivity=TRIGGERED) ? "  - CONDUCTIVITY SENSOR\n" : "")
+             +"\nDate/Time: "+ device.datetime +"\nDevice Status: "+ device.status+ "\n\nTo stop alerts please type \"OK\"");
       count = 0;
       loops++;
     }//if
