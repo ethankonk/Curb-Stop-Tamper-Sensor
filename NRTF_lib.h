@@ -42,10 +42,20 @@
 #define AmSilent 9
 #define CantArm 10
 
+// SPI STUFF
+inline static SPIClassSAMD rfSPI (&sercom1, 28, 26, 25, SPI_PAD_0_SCK_1, SERCOM_RX_PAD_3);
+// Function Edge_Pin Port SAMD21G_pin Pad
+// MISO D12 PA19 28 Pad3
+// MOSI D11 PA16 25 Pad0
+// SCK D13 PA17 26 Pad1
+
 // radio stuff
 #define TRANSMIT 0
 #define LISTEN 1
-inline RF24 radio(7,8);
+#define CE_PIN 3
+#define CSN_PIN 4
+inline RF24 radio(CE_PIN, CSN_PIN);
+
 
 inline const byte address[6] = "00001";
 inline boolean radioMode = TRANSMIT;                   // false: transmitting | true: listening

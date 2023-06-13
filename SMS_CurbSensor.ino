@@ -1,6 +1,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <SPI.h>
+#include <RF24.h>
+#include "wiring_private.h"
 #include "sim7600_lib.h"
 #include "NRTF_lib.h"
 
@@ -37,18 +40,21 @@ IMPORTANT INFORMATION
 // MISC. variables
 String response = "";
 
-
 void setup() {
   setDeviceID(DEBUG);
 
-  SerialUSB.begin(115200);                                          // initialize the USB serial port.
-  Serial1.begin(115200);                                            // initialize the SIM7600 module (Hardwired to Serial1).
+  SerialUSB.begin(115200);                                                // initialize the USB serial port.
+  Serial1.begin(115200);                                                  // initialize the SIM7600 module (Hardwired to Serial1).
+  rfSPI.begin();
+  pinPeripheral(11, PIO_SERCOM);
+  pinPeripheral(12, PIO_SERCOM);
+  pinPeripheral(13, PIO_SERCOM);
 
-  if(!radio.begin()){SerialUSB.println("Radio failed to start");}   // initialize radio.
-  radio.setDataRate(RF24_1MBPS);                                    // set high data rate for longer distance.
+  if(!radio.begin(&rfSPI)){SerialUSB.println("Radio failed to start");}   // initialize radio.
+  radio.setDataRate(RF24_1MBPS);                                          // set high data rate for longer distance.
   radio.setPALevel(RF24_PA_HIGH);  
 
-  pinMode(LTE_RESET_PIN, OUTPUT);                                   // bunch of initialization stuff 
+  pinMode(LTE_RESET_PIN, OUTPUT);                                        
   digitalWrite(LTE_RESET_PIN, LOW);
 
   pinMode(LTE_PWRKEY_PIN, OUTPUT);
