@@ -58,7 +58,7 @@ inline RF24 radio(CE_PIN, CSN_PIN);
 
 
 inline const byte address[6] = "00001";
-inline boolean radioMode = SEND;                   // false: transmitting | true: listening
+inline boolean radioMode;                         // false: transmitting | true: listening
 
 // NRF24L01 buffer limit is 32 bytes (max struct size)
 struct payloadtype { 
