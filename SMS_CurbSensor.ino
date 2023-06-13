@@ -1,6 +1,3 @@
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
 #include <SPI.h>
 #include <RF24.h>
 #include "wiring_private.h"
@@ -103,7 +100,8 @@ void loop() {
 
   //   for(int i=0; i<3; i++){
   //     if(device[i].configured)
-  //       if(updateRF(device[i].RFaddress))
+  //       
+  //       if(getPayload(device[i].RFaddress))
   //        device[i] = storeStatus(device[i]);
   
   //        if(device[i].state == Alarming)

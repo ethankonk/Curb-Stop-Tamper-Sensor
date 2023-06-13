@@ -1,8 +1,4 @@
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
 #include <Arduino.h>
-
 #include "sim7600_lib.h"
 #include "NRTF_lib.h"
 

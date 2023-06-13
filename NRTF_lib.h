@@ -42,7 +42,7 @@
 #define AmSilent 9
 #define CantArm 10
 
-// SPI STUFF
+// SPI stuff
 inline static SPIClassSAMD rfSPI (&sercom1, 28, 26, 25, SPI_PAD_0_SCK_1, SERCOM_RX_PAD_3);
 // Function Edge_Pin Port SAMD21G_pin Pad
 // MISO D12 PA19 28 Pad3
@@ -50,15 +50,15 @@ inline static SPIClassSAMD rfSPI (&sercom1, 28, 26, 25, SPI_PAD_0_SCK_1, SERCOM_
 // SCK D13 PA17 26 Pad1
 
 // radio stuff
-#define TRANSMIT 0
-#define LISTEN 1
+#define SEND 0
+#define GET 1
 #define CE_PIN 3
 #define CSN_PIN 4
 inline RF24 radio(CE_PIN, CSN_PIN);
 
 
 inline const byte address[6] = "00001";
-inline boolean radioMode = TRANSMIT;                   // false: transmitting | true: listening
+inline boolean radioMode = SEND;                   // false: transmitting | true: listening
 
 // NRF24L01 buffer limit is 32 bytes (max struct size)
 struct payloadtype { 
@@ -79,10 +79,10 @@ inline payloadtype payload;
 inline payloadtype Message;
 inline unsigned long lastSignalMillis = 0;
 
-boolean updateRF(const byte address[]);
-boolean sendPacket(char address[]);
+boolean getPayload(const byte address[]);
+boolean sendPayload(char address[]);
 boolean pingRF(char address[]);
-void loadPacket(Sensor device);
+void loadPayload(Sensor device);
 void DumpDatabase();
 
 
