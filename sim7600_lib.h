@@ -46,7 +46,7 @@ inline char buffer[64];                                  //For notifications
     int tilt = OFF;
     int light = OFF;
     int conductivity = OFF;
-    char RFaddress[6] = "00000";
+    char address[6] = "00000";
     int configured = 0;
     int BatLevel = 0;
   };

@@ -36,7 +36,7 @@ boolean sendSMS(String message){
     response += char(Serial1.read());
 
 
-  if(response.indexOf("ERROR") != -1){
+  if(serial.indexOf("ERROR") != -1 || response.indexOf("ERROR") != -1){
     if(DEBUG){SerialUSB.println(response);}
     SerialUSB.println("Failed to send message");
     return false;
@@ -379,13 +379,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       break;
 
     if(userResponse.indexOf("n") == 0){
-      // loadPacket(device);
-      // if(!sendPacket(device.RFaddress)){
-      //   sendSMS("S"+ String(device.ID) +" Failed To Configure.");
-      //   return device;                                                   // IMPORTANT*** MAKE SURE TO CHANGE THIS PLEASE.
-      // }
-
-      sendSMS("S"+ String(device.ID) +" Configured.");                   // IMPORTANT** MAKE SURE THIS PUSHES THE CONFIG TOO THE SENSOR
+      sendSMS("S"+ String(device.ID) +" Configuration Saved.");                   // IMPORTANT** MAKE SURE THIS PUSHES THE CONFIG TOO THE SENSOR
       device.configured = 1;                                             // VERY IMPORTANT LATER ^^^
       return device;
     }//if

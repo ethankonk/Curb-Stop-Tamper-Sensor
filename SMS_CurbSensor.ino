@@ -96,8 +96,6 @@ int count = 0;
 void loop() {
   updateSMS(0);
 
-  // if (count == 150){
-
   //   for(int i=0; i<3; i++){
   //     if(device[i].configured)
   //       
@@ -109,8 +107,6 @@ void loop() {
          
   //   }
 
-  //   count = 0;
-  // }
   
   delay(100);
   count++;
