@@ -458,7 +458,7 @@ Sensor Disarm(Sensor device, boolean debug){
          +"\nAddress: "+ device.name 
          +"\nAre you sure you would like to disarm s"+ String(device.ID) +"? (y or n)");
 
-  while(x){
+  while(message.equals("NORESPONSE")){
     message = getYN(1000, debug);
 
     if(message.indexOf("y") == 0){
