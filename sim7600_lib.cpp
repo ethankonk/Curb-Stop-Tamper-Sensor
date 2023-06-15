@@ -460,7 +460,7 @@ Sensor AlarmOn(Sensor device){
     sendSMS("Failed to arm.");
     return device;
   }
-  delay(100);
+  delay(1000);
   if(!getPayload(address)){ sendSMS("Failed to reach module. Arming canceled."); return device;}
   if(Message.State == CantArm){ 
     sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
@@ -544,7 +544,7 @@ String getDateTime(){
   int first = date.indexOf("\"");
   int last = date.indexOf("\"");
   date.remove(0, first+1);
-  date.remove(last+1, 20);
+  date.remove(last-1, 20);
   date.trim();
 
   if (DEBUG){SerialUSB.println(date);}
