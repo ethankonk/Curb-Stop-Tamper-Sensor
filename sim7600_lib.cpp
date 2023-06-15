@@ -455,12 +455,13 @@ Sensor AlarmOn(Sensor device){
     sendSMS("Failed to load config.");
     return device;  
   }
+  delay(1000);
   loadPayload(device, GoToArm);
   if(!sendPayload(address)){
     sendSMS("Failed to arm.");
     return device;
   }
-  delay(1000);
+  delay(2000);
   if(!getPayload(address)){ sendSMS("Failed to reach module. Arming canceled."); return device;}
   if(Message.State == CantArm){ 
     sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
