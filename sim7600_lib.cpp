@@ -299,7 +299,7 @@ void Status(Sensor device, boolean debug){
             +"\nName: "+ device.name 
             +"\nStatus: "+ (device.status ? "ACTIVE" : "INACTIVE")
             +"\nLast Updated: "+ device.datetime
-            +"\nBattery Level: "+ device.BatLevel);
+            +"\nBattery Level: "+ device.BatLevel +"%");
   sendSMS(message);
   SerialUSB.println(message);
   
@@ -461,7 +461,7 @@ Sensor Disarm(Sensor device, boolean debug){
          +"\nAre you sure you would like to disarm s"+ String(device.ID) +"? (y or n)");
 
   while(1){       //MAKE THIS TIMEOUT
-    message = getYN(1000, debug);
+    message = getYN(600000, debug);
 
     if(message.equals("y")){
       device.state = GoToSleep;
@@ -471,10 +471,12 @@ Sensor Disarm(Sensor device, boolean debug){
       device.conductivity = OFF;
       device.configured = 0;
 
+      // TELL SENSOR MODULE TOO DISARM.
       sendSMS("s"+ String(device.ID) +" disarmed.");
       break;
     }
-    else if(message.equals("n") == 0){
+
+    else if(message.equals("n")){
       sendSMS("Disarm canceled");
       break;
     }
@@ -484,10 +486,7 @@ Sensor Disarm(Sensor device, boolean debug){
       break;
     }
   }
-
-  if(debug)
-    SerialUSB.println("DISARMING COMPLETE");
-  
+  if(debug){SerialUSB.println("DISARMING COMPLETE");} 
   return device;
 }
 
