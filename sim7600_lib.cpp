@@ -380,6 +380,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       return device;
     }//if
     sendSMS("RECONFIGURING...");
+    device.conductivity = OFF; device.light = OFF; device.tilt = OFF;
     userResponse = "";
   }//while
   sendSMS("S"+ String(device.ID) +" configuration canceled. Proccess timed out.");
