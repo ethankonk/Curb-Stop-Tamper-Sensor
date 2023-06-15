@@ -459,7 +459,6 @@ Sensor AlarmOn(Sensor device){
 
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
   return device;
-
 }
 
 

@@ -22,8 +22,8 @@ boolean getPayload(const byte address[6]){
     Message.BatLevel = payload.BatLevel;
     Message.MessageCount = payload.MessageCount;
     Message.MessageType = payload.MessageType;
-//    Message.AlarmDelay = payload.AlarmDelay;
-//    Message.ControllerID = payload.ControllerID;
+    Message.AlarmDelay = payload.AlarmDelay;
+    Message.ControllerID = payload.ControllerID;
     Message.Mode = payload.Mode;
     Message.NodeID = payload.NodeID;
     Message.Sensor1 = payload.Sensor1;
@@ -53,15 +53,15 @@ boolean sendPayload(const byte address[6]){
     SerialUSB.print("S+");
     delay(1000);
   }
-  if(SentOk) {SerialUSB.println("\nMessage sent OK."); }
+  if(SentOk) {
+    SerialUSB.println("\nMessage sent OK."); 
+  }
   else {
     SerialUSB.print("Message send failure. ");
     SerialUSB.println("Reconfiguring radio.");
     configureRadio(address);
     radio.stopListening();
   }
-
-  radio.startListening();
   return SentOk;
 }
 
@@ -82,6 +82,7 @@ void DumpDatabase(Sensor device) { // debug tool
   SerialUSB.print("Alarm delay ="); SerialUSB.println(Message.AlarmDelay);
   SerialUSB.print("Battery level ="); SerialUSB.println(Message.BatLevel);
   SerialUSB.println("------------  end -------------");
+  return;
 }
 
 
@@ -97,7 +98,6 @@ boolean configureRadio(const byte address[6]){
   radio.openWritingPipe(address);
 
   radio.startListening();
-  radio.printDetails();
   radioMode = SEND;  
   return true;    
 }

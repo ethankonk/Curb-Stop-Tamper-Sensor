@@ -32,7 +32,7 @@ IMPORTANT INFORMATION
 
 
 // debug toggle
-#define DEBUG true
+#define DEBUG false
 
 // MISC. variables
 String response = "";
@@ -93,13 +93,14 @@ void setup() {
 }
 
 void loop() {
+  SerialUSB.print("."); 
   updateSMS(0);
 
   //for(int i=0; i<3; i++){
     //if(device[i].configured)
   if(getPayload(address)){
     device[0] = storeStatus(device[0]);
-    DumpDatabase(device[0]);
+    sendCMD("AT+CGMM", 1000, DEBUG);
   }
   if(device[0].state == Alarming)
     Alarm(device[0]);     
