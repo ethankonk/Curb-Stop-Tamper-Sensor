@@ -637,6 +637,7 @@ Sensor storeStatus(Sensor device){
   device.tilt = Message.Sensor1;
   device.light = Message.Sensor2;
   device.conductivity = Message.Sensor3;
+  return device;
 }
 
 

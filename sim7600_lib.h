@@ -1,7 +1,7 @@
 /* sim7600_lib header */
 #ifndef SIM7600_LIB_H
 #define SIM7600_LIB_H
-#define DEBUG true
+#define DEBUG false
 
 // constants for module status
 #define INACTIVE 0

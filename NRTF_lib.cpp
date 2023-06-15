@@ -30,7 +30,7 @@ boolean getPayload(const byte address[6]){
     Message.Sensor2 = payload.Sensor2;
     Message.Sensor3 = payload.Sensor3;
     Message.State = payload.State;
-    DumpDatabase(device[0]);
+    DumpDatabase(device[0]); 
     return true;
   }
 

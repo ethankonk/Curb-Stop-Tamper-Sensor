@@ -10,16 +10,6 @@ Water Curb Box Sensor
 - send/receive messages from or too cellular device over SMS
 - sends and receives RF transmits from multiple sensor devices
 - hardware bult on Maduino SIM7600A chip
-
-IMPORTANT INFORMATION
-- for proper functionality, the board requires atleast 3 bars of cell service. 
-- good connection will be displayed on the board by the green/yellow LED next to the blue LED.
-- if the cell service is good, the light will flash.
-- cell service in the area can also be tested using a phone connected to any cellular network.
-- if the board is not sending or responding too text messages, try rellocating the board to an area with 
-- better cell service.
-
-- make sure too power off the board before reinitializing.
 */
 
 // digital pin assignments
@@ -100,7 +90,7 @@ void loop() {
     //if(device[i].configured)
   if(getPayload(address)){
     device[0] = storeStatus(device[0]);
-    sendCMD("AT+CGMM", 1000, DEBUG);
+    //sendCMD("AT+CGMM", 1000, DEBUG);
   }
   if(device[0].state == Alarming)
     Alarm(device[0]);     

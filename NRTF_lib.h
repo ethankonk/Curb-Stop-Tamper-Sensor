@@ -1,12 +1,11 @@
 /* NRTF_lib header */
 #ifndef NRTF_LIB_H
 #define NRTF_LIB_H
-#define DEBUG true
-
 #include <string.h>
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
+#define DEBUG true
 
 // constants for different sensor to controller message types.
 #define STATUS 0
