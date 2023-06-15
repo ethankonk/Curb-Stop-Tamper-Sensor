@@ -462,11 +462,12 @@ Sensor AlarmOn(Sensor device){
     return device;
   }
   delay(2000);
-  // if(Message.State == CantArm){ 
-  //   sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
-  //   loadPayload(device, GoToSleep);
-  //   if(!sendPayload(address)){  sendSMS("EVERYTHING IS FALLING APART AAAAAAAAAAAAA"); return device;}
-  // }
+  if(!getPayload(address)){ sendSMS("Failed to reach module."); return device;}
+  if(Message.State == CantArm){ 
+    sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
+    loadPayload(device, GoToSleep);
+    if(!sendPayload(address)){  sendSMS("EVERYTHING IS FALLING APART AAAAAAAAAAAAA"); return device;}
+  }
 
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
   acknowledge = false;
@@ -476,6 +477,9 @@ Sensor AlarmOn(Sensor device){
 
 
 Sensor Disarm(Sensor device){
+  unsigned long long int time = millis();
+  long int timeout = 600000;
+  time = time + timeout;
   String message;
 
   if(!device.configured){ 
@@ -488,7 +492,7 @@ Sensor Disarm(Sensor device){
          +"\nAre you sure you would like to disarm s"+ String(device.ID) +"? (y or n)");
 
   while(1){       //MAKE THIS TIMEOUT
-    message = getYN(600000);
+    message = getYN(time);
 
     if(message.equals("y")){
       device.state = GoToSleep;
@@ -497,6 +501,12 @@ Sensor Disarm(Sensor device){
       device.tilt = OFF;
       device.conductivity = OFF;
       device.configured = 0;
+
+      loadPayload(device, LoadParms);
+      sendPayload(address);
+      delay(10000);
+      loadPayload(device, GoToSleep);
+      sendPayload(address);
 
       // TELL SENSOR MODULE TOO DISARM.
       sendSMS("s"+ String(device.ID) +" disarmed.");
@@ -667,9 +677,8 @@ void setDeviceAddress(){
   for(int i = 0; i <= 3; i++){
     ID = i+1;
     char c = ID + '0';
-    char new_address[6] = {'0','0','0','0', c};
+    // device.address[6] = {'0','0','0','0', c};
     //strcpy(device[i].address, new_address);
-    strcpy(device[i].address, new_address);
     if(DEBUG){ SerialUSB.println("Device "+ String(ID) +" address: "+ String(device[i].address));}
   }
 }
