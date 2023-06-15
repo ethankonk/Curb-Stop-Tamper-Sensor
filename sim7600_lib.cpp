@@ -450,7 +450,6 @@ Sensor AlarmOn(Sensor device, boolean debug){
 
 Sensor Disarm(Sensor device, boolean debug){
   String message;
-  int x = 1;
 
   if(!device.configured){ 
     sendSMS("S"+ String(device.ID) +" has not been configured yet. Disarm canceled.");
@@ -477,6 +476,11 @@ Sensor Disarm(Sensor device, boolean debug){
     }
     else if(message.equals("n") == 0){
       sendSMS("Disarm canceled");
+      break;
+    }
+
+    else if(message.equals("NORESPONSE")){
+      sendSMS("Disarm canceled. Process timed out.");
       break;
     }
   }
