@@ -351,7 +351,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     if(userResponse.equals("NORESPONSE"))
       break;
     
-    if(userResponse.indexOf("y") == 0)
+    if(userResponse.equals("y"))
       device.light = ON;
     sendSMS("OK.");
     delay(100);
@@ -361,7 +361,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     if(userResponse.equals("NORESPONSE"))
       break;
 
-    if(userResponse.indexOf("y") == 0)
+    if(userResponse.equals("y"))
       device.conductivity = ON;
     sendSMS("OK.");
     delay(100);
@@ -374,7 +374,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     if(userResponse.equals("NORESPONSE"))
       break;
 
-    if(userResponse.indexOf("n") == 0){
+    if(userResponse.equals("n")){
       sendSMS("S"+ String(device.ID) +" Configuration Saved.");                   // IMPORTANT** MAKE SURE THIS PUSHES THE CONFIG TOO THE SENSOR
       device.configured = 1;                                             // VERY IMPORTANT LATER ^^^
       return device;
@@ -382,7 +382,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     sendSMS("RECONFIGURING...");
     userResponse = "";
   }//while
-  sendSMS("s"+ String(device.ID) +" configuration canceled. Proccess timed out.");
+  sendSMS("S"+ String(device.ID) +" configuration canceled. Proccess timed out.");
   return device;
 }//function
 
