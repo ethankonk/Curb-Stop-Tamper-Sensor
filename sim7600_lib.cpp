@@ -100,7 +100,7 @@ String readSMS(const int timeout, int slot){
   else
     if(DEBUG){SerialUSB.println("No unread messages");}
 
-  clearSMS(DEBUG);
+  clearSMS();
   return "";
 }
 
@@ -109,13 +109,13 @@ String readSMS(const int timeout, int slot){
 /*Clears all old SMS messages*/
 // parameters:
 //  - debug, debugging purposes
-void clearSMS(boolean debug){
+void clearSMS(){
   String CMD = "";
   String response = "";
 
   for(int i = 0; i <= 49; i++){                                 // clears all 50 stored messages.
     CMD = "AT+CMGD=" + String(i);    
-    sendCMD(CMD, 10, debug);
+    sendCMD(CMD, 10, DEBUG);
     //Serial1.println(CMD);    
     delay(1);
     
@@ -129,7 +129,7 @@ void clearSMS(boolean debug){
       return;
     }//if
     
-    if (debug){                                                 // for debugging
+    if (DEBUG){                                                 // for debugging
       while(Serial1.available()){
         SerialUSB.write(Serial1.read());
         delay(1);
@@ -375,8 +375,10 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       break;
 
     if(userResponse.equals("n")){
-      sendSMS("S"+ String(device.ID) +" Configuration Saved.");                   // IMPORTANT** MAKE SURE THIS PUSHES THE CONFIG TOO THE SENSOR
-      device.configured = 1;                                             // VERY IMPORTANT LATER ^^^
+      sendSMS("S"+ String(device.ID) +" Configuration Saved.");
+      sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\ns# arm\nhelp");
+      device.configured = 1;
+      clearSMS();                 
       return device;
     }//if
     sendSMS("RECONFIGURING...");
@@ -531,8 +533,10 @@ String getDateTime(){
     return "";
   }
 
-  date.remove(0, 25);
-  date.remove(17, 20);
+  int first = date.indexOf("\"");
+  int last = date.indexOf("\"");
+  date.remove(0, first);
+  date.remove(last, 20);
 
   if (DEBUG){SerialUSB.println(date);}
 
@@ -609,6 +613,9 @@ void Alarm(Sensor device){
       SerialUSB.println("Acknowledgement Received");
       sendSMS("ALERT ACKNOWLEDGED.");
       acknowledge = true;
+      device.state = Asleep;
+      loadPayload(device, GoToSleep);
+      sendPayload(address);
       return;
     }
 

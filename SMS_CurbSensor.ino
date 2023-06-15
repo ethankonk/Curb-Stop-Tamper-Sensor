@@ -70,7 +70,7 @@ void setup() {
   sendCMD("AT+CNMI=2,1,0,0,0", 1000, DEBUG);                      // set up notification for incoming SMS messages
 
   SerialUSB.println("Clearing Old SMS Messages...");              
-  clearSMS(DEBUG);                                                // clear up SMS storage
+  clearSMS();                                                // clear up SMS storage
   delay(100);
 
   configureRadio(address);
@@ -83,7 +83,6 @@ void setup() {
 }
 
 void loop() {
-  SerialUSB.print("."); 
   updateSMS(0);
 
   //for(int i=0; i<3; i++){

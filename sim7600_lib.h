@@ -67,7 +67,7 @@ Sensor storeStatus(Sensor device);
 boolean checkSMS(String message, int slot, boolean debug);
 boolean sendSMS(String message);
 int getID(String message, boolean debug);
-void clearSMS(boolean debug);
+void clearSMS();
 void Status(Sensor device, boolean debug);
 void Help(boolean debug);
 void Alarm(Sensor device);

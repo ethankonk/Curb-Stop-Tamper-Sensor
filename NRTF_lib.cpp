@@ -46,7 +46,6 @@ boolean sendPayload(const byte address[6]){
   radio.stopListening();
   delay(500);
   radioMode = SEND;   // radio set to "transmitting"
-
   while ((!SentOk) && (Retry<6)){  
     SentOk = radio.write(&payload, sizeof(payload));
     Retry++;
@@ -54,13 +53,14 @@ boolean sendPayload(const byte address[6]){
     delay(1000);
   }
   if(SentOk) {
-    SerialUSB.println("\nMessage sent OK."); 
+    SerialUSB.println("\nMessage sent OK.");
   }
   else {
     SerialUSB.print("Message send failure. ");
     SerialUSB.println("Reconfiguring radio.");
     configureRadio(address);
     radio.stopListening();
+
   }
   return SentOk;
 }
