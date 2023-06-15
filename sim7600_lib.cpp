@@ -446,10 +446,15 @@ Sensor AlarmOn(Sensor device){
   device.state = Armed;
 
   // SEND COMMAND TO ARM TO RADIO
+  loadPayload(device, LoadParms);
+  if(!sendPayload(address)){
+    sendSMS("Failed to load config.");
+    return device;  
+  }
   loadPayload(device, GoToArm);
   if(!sendPayload(address)){
     sendSMS("Failed to arm.");
-    return device;  
+    return device;
   }
 
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
