@@ -251,13 +251,13 @@ boolean checkSMS(String message, int slot, boolean debug){
       
     else if(message.indexOf("disarm") == 0){                             // checks for "2".
       if(debug){SerialUSB.println("SENDING CODE 2");}
-      device[ID-1] = Disarm(device[ID-1], DEBUG);
+      device[ID-1] = Disarm(device[ID-1]);
       return true;
     }
 
     else if(message.indexOf("arm") == 0){                                // checks for "alarming"
       if(debug){SerialUSB.println("SENDING CODE 3");}
-      device[ID-1] = AlarmOn(device[ID-1], DEBUG);
+      device[ID-1] = AlarmOn(device[ID-1]);
       return true;
     }
 
@@ -337,7 +337,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     device.name = userResponse;
 
     sendSMS("Activate TILT SENSOR? y/n");
-    userResponse = getYN(time, debug);
+    userResponse = getYN(time);
     if(userResponse.equals("NORESPONSE"))
       break;
 
@@ -347,7 +347,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     delay(100);
     
     sendSMS("Activate LIGHT SENSOR? y/n");
-    userResponse = getYN(time, debug);
+    userResponse = getYN(time);
     if(userResponse.equals("NORESPONSE"))
       break;
     
@@ -357,7 +357,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     delay(100);
 
     sendSMS("Activate CONDUCTIVITY SENSOR? y/n");
-    userResponse = getYN(time, debug);
+    userResponse = getYN(time);
     if(userResponse.equals("NORESPONSE"))
       break;
 
@@ -370,7 +370,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     sendSMS(message);
 
     sendSMS("Would you like to make any changes? y/n");
-    userResponse = getYN(time, debug);
+    userResponse = getYN(time);
     if(userResponse.equals("NORESPONSE"))
       break;
 
@@ -435,7 +435,7 @@ Sensor ReqCommand(String cmd, Sensor device, boolean debug){
 
 /*  Sets the device to ALARMING mode.
     SAME CHANGES TO BE MADE                               */
-Sensor AlarmOn(Sensor device, boolean debug){
+Sensor AlarmOn(Sensor device){
   String message;
 
   if(!device.configured){
@@ -459,7 +459,7 @@ Sensor AlarmOn(Sensor device, boolean debug){
 
 
 
-Sensor Disarm(Sensor device, boolean debug){
+Sensor Disarm(Sensor device){
   String message;
 
   if(!device.configured){ 
@@ -472,7 +472,7 @@ Sensor Disarm(Sensor device, boolean debug){
          +"\nAre you sure you would like to disarm s"+ String(device.ID) +"? (y or n)");
 
   while(1){       //MAKE THIS TIMEOUT
-    message = getYN(600000, debug);
+    message = getYN(600000);
 
     if(message.equals("y")){
       device.state = GoToSleep;
@@ -497,7 +497,7 @@ Sensor Disarm(Sensor device, boolean debug){
       break;
     }
   }
-  if(debug){SerialUSB.println("DISARMING COMPLETE");} 
+  if(DEBUG){SerialUSB.println("DISARMING COMPLETE");} 
   return device;
 }
 
@@ -553,7 +553,7 @@ int getID(String message, boolean debug){
 
 
 
-String getYN(int time, boolean debug){
+String getYN(int time){
   int x = 1;
   String response = "";
 
@@ -592,12 +592,12 @@ void Help(boolean debug){
 
 
 
-void Alarm(Sensor device, boolean debug){
-  int count = 0;
+void Alarm(Sensor device){
+  int count = 1800000;
   int loops = 0;
   int acknowledge = false;
 
-  while(!acknowledge && loops < 3){
+  while(!(acknowledge) && loops < 3){
     count++;
     if(updateSMS(1) != ""){
       SerialUSB.println("Acknowledgement Received");
@@ -606,14 +606,15 @@ void Alarm(Sensor device, boolean debug){
       return;
     }
 
-    if(count == 1800000){
-      sendSMS("<<ALERT>>\nDevice ID: "+ String(device.ID) + " has been tampered with!\nInstall Address: "+ device.name 
+    if(count >= 1800000){
+      sendSMS("<<ALERT>>\nDevice ID: "+ String(device.ID) + " has been tampered with!");
+      sendSMS("Install Address: "+ device.name 
              +"\nSensors Triggered:\n"
-             +((device.tilt=TRIGGERED) ? "  - TILT SENSOR\n" : "") 
-             +((device.light=TRIGGERED) ? "  - LIGHT SENSOR\n" : "")
-             +((device.conductivity=TRIGGERED) ? "  - CONDUCTIVITY SENSOR\n" : "")
-             +"\nDate/Time: "+ device.datetime +"\nDevice Status: "+ device.status
-             +"\n\nTo stop alerts please type \"OK\"");
+             +((device.tilt==TRIGGERED) ? "  - TILT SENSOR\n" : "") 
+             +((device.light==TRIGGERED) ? "  - LIGHT SENSOR\n" : "")
+             +((device.conductivity==TRIGGERED) ? "  - CONDUCTIVITY SENSOR\n" : "")
+             +"Date/Time: "+ device.datetime +"\nDevice Status: "+ device.status);
+      sendSMS("To stop alerts please type \"OK\"");
       count = 0;
       loops++;
     }//if

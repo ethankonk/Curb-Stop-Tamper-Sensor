@@ -92,6 +92,8 @@ void setup() {
   if(POOR_CONNECTION){  sendSMS("WARNING! POOR LTE CONNECTION. MESSAGES MAY TAKE LONGER TO SEND.");}
   sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\nhelp");
   delay(100);
+
+  Alarm(device[1]);
 }
 
 int count = 0;
