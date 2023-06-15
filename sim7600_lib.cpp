@@ -535,8 +535,9 @@ String getDateTime(){
 
   int first = date.indexOf("\"");
   int last = date.indexOf("\"");
-  date.remove(0, first);
+  date.remove(0, first+1);
   date.remove(last, 20);
+  date.trim();
 
   if (DEBUG){SerialUSB.println(date);}
 
@@ -626,7 +627,9 @@ void Alarm(Sensor device){
              +((device.tilt==TRIGGERED) ? "  - TILT SENSOR\n" : "") 
              +((device.light==TRIGGERED) ? "  - LIGHT SENSOR\n" : "")
              +((device.conductivity==TRIGGERED) ? "  - CONDUCTIVITY SENSOR\n" : "")
-             +"Date/Time: "+ device.datetime +"\nDevice Status: "+ device.status);
+             +"Date/Time: "+ device.datetime 
+             +"\nDevice Status: "
+             +((device.status==ACTIVE) ? "ACTIVE" : "INACTIVE"));
       sendSMS("To stop alerts please type \"OK\"");
       count = 0;
       loops++;
