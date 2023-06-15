@@ -38,17 +38,17 @@ inline char buffer[64];                                  //For notifications
 
 // struct for unit data storage
   struct Sensor{
-    int ID = 0;
+    byte ID = 0;
+    byte status = INACTIVE;
+    byte state = NullState;
+    byte tilt = OFF;
+    byte light = OFF;
+    byte conductivity = OFF;
+    byte BatLevel = 0;
     String name = "";
-    int status = INACTIVE; // CHANGE SOON
-    int state = NullState;
     String datetime = "";
-    int tilt = OFF;
-    int light = OFF;
-    int conductivity = OFF;
-    char address[6] = "00000";
     int configured = 0;
-    int BatLevel = 0;
+    char address[6] = "00000";
   };
 inline Sensor device[4];
 
@@ -71,7 +71,8 @@ void Status(Sensor device, boolean debug);
 void Help(boolean debug);
 void Alarm(Sensor device, boolean debug);
 void Example(String message, boolean debug);
-void setDeviceID(boolean debug);
+void setDeviceID();
+void setDeviceAddress();
 // boolean getReadyInstall(Sensor device, boolean debug);
 
 

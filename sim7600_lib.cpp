@@ -272,16 +272,11 @@ boolean checkSMS(String message, int slot, boolean debug){
   }// else if
 
 
-  else if(message.indexOf("example") == 0){
-    message.remove(0, 8);
-    Example(message, debug);
-  }
-
-
   else{                                                             // if message none of the above, function returns false which signals
     /*DEBUGGING*/                                                   // that nothing of value was received. WILL CHANGE TO DELETE MESSAGES (MAYBE).
     if(debug)
       SerialUSB.println("NOT AN OPTION");
+
 
     message.trim();
     sendSMS("\""+ message +"\" is not a known command. Please type \"help\" for a list of commands.");    
@@ -488,10 +483,10 @@ Sensor Disarm(Sensor device, boolean debug){
 
 
 /*Gives all devices an ID*/ 
-void setDeviceID(boolean debug){
+void setDeviceID(){
   for(int i = 0; i < 3; i++){
     device[i].ID = i+1;
-    if (debug){SerialUSB.println("Device "+ String(i) +" ID: "+ String(device[i].ID));}
+    if (DEBUG){SerialUSB.println("Device "+ String(i) +" ID: "+ String(device[i].ID));}
   }
 }
 
@@ -624,23 +619,13 @@ void Alarm(Sensor device, boolean debug){
              +((device.tilt=TRIGGERED) ? "  - TILT SENSOR\n" : "") 
              +((device.light=TRIGGERED) ? "  - LIGHT SENSOR\n" : "")
              +((device.conductivity=TRIGGERED) ? "  - CONDUCTIVITY SENSOR\n" : "")
-             +"\nDate/Time: "+ device.datetime +"\nDevice Status: "+ device.status+ "\n\nTo stop alerts please type \"OK\"");
+             +"\nDate/Time: "+ device.datetime +"\nDevice Status: "+ device.status
+             +"\n\nTo stop alerts please type \"OK\"");
       count = 0;
       loops++;
     }//if
   delay(1);
   }//while
-}
-
-
-
-void Example(String message, boolean debug){
-
-  if(message.indexOf("status") == 0)
-    sendSMS("An example of how the \"status\" command is used is:\ns1 status\n  - The \"1\" being the ID of the unit you would like to see the status of.");
-  
-  else if(message.indexOf("configure") == 0)
-    sendSMS("An example of how the \"configure\" command is used is:\ns4 configure\n  - The \"4\" being the ID of the unit you would like to configure.");
 }
 
 
@@ -652,4 +637,17 @@ Sensor storeStatus(Sensor device){
   device.tilt = Message.Sensor1;
   device.light = Message.Sensor2;
   device.conductivity = Message.Sensor3;
+}
+
+
+
+void setDeviceAddress(){
+  int ID;
+
+  for(int i = 0; i < 3; i++){
+    ID = i+1;
+    char new_address[6] = {'0','0','0','0','char(ID)'};
+    if(DEBUG){ SerialUSB.println("Device "+ String(ID) +" address: "+ new_address);}
+    strcpy(device[i].address, new_address);
+  }
 }

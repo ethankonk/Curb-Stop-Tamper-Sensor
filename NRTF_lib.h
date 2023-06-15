@@ -82,6 +82,7 @@ inline unsigned long lastSignalMillis = 0;
 boolean getPayload(const byte address[]);
 boolean sendPayload(char address[]);
 boolean pingRF(char address[]);
+boolean configureRadio();
 void loadPayload(Sensor device);
 void DumpDatabase();
 

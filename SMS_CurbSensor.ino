@@ -38,7 +38,7 @@ IMPORTANT INFORMATION
 String response = "";
 
 void setup() {
-  setDeviceID(DEBUG);
+  setDeviceID();
 
   SerialUSB.begin(115200);                                                // initialize the USB serial port.
   Serial1.begin(115200);                                                  // initialize the SIM7600 module (Hardwired to Serial1).
@@ -108,7 +108,7 @@ void loop() {
   //   }
 
   
-  delay(100);
+  delay(1);
   count++;
 }
 
