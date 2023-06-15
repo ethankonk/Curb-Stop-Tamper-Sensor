@@ -62,6 +62,7 @@ boolean sendPayload(const byte address[6]){
     radio.stopListening();
 
   }
+  radio.startListening();
   return SentOk;
 }
 

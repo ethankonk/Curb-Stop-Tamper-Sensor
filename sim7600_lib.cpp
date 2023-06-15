@@ -326,7 +326,6 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     return device;
   }
 
-  sendSMS("----- Configuring s"+ String(device.ID) +" -----\nIF LEFT UNCONFIGURED FOR MORE THAN 10 MINUTES, S"+ String(device.ID) +" WILL POWER OFF.");
   while(time > millis() || loop){
 
     sendSMS("What is the address of the installation of s"+ String(device.ID) +"?");
@@ -455,14 +454,14 @@ Sensor AlarmOn(Sensor device){
     sendSMS("Failed to load config.");
     return device;  
   }
-  delay(10000);
+  delay(6000);
   loadPayload(device, GoToArm);
   if(!sendPayload(address)){
     sendSMS("Failed to arm.");
     return device;
   }
-  delay(2000);
-  if(!getPayload(address)){ sendSMS("Failed to reach module."); return device;}
+  delay(5000);
+  // if(!getPayload(address)){ sendSMS("Failed to reach module."); return device;}
   if(Message.State == CantArm){ 
     sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
     loadPayload(device, GoToSleep);
