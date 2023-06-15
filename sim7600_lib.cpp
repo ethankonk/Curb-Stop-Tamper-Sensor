@@ -334,6 +334,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     while(userResponse.equals("") && time > millis())
       userResponse = updateSMS(1);
 
+    userResponse.trim();
     device.name = userResponse;
 
     sendSMS("Activate TILT SENSOR? y/n");
@@ -459,6 +460,13 @@ Sensor AlarmOn(Sensor device){
     sendSMS("Failed to arm.");
     return device;
   }
+  delay(100);
+  if(!getPayload(address)){ sendSMS("Failed to reach module. Arming canceled."); return device;}
+  if(Message.State == CantArm){ 
+    sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
+    loadPayload(device, GoToSleep);
+    if(!sendPayload(address)){  sendSMS("EVERYTHING IS FALLING APART AAAAAAAAAAAAA"); return device;}
+  }
 
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
   return device;
@@ -536,7 +544,7 @@ String getDateTime(){
   int first = date.indexOf("\"");
   int last = date.indexOf("\"");
   date.remove(0, first+1);
-  date.remove(last, 20);
+  date.remove(last+1, 20);
   date.trim();
 
   if (DEBUG){SerialUSB.println(date);}
