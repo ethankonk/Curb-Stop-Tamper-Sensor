@@ -23,6 +23,7 @@ Water Curb Box Sensor
 
 // debug toggle
 #define DEBUG false
+#define DEBUGGING_ALARM true
 
 // MISC. variables
 String response = "";
@@ -80,6 +81,14 @@ void setup() {
   if(POOR_CONNECTION){  sendSMS("WARNING! POOR LTE CONNECTION. MESSAGES MAY TAKE LONGER TO SEND.");}
   sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\ns# arm\nhelp");
   delay(100);
+
+  if(DEBUGGING_ALARM){
+    SerialUSB.println("DEBUGGING ALARM");
+    device[0].configured = 1;
+    device[0].tilt = ON;
+    device[0].name = "123 main st";
+    device[0].status = ACTIVE;
+  }
 }
 
 void loop() {

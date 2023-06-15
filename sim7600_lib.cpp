@@ -633,7 +633,7 @@ void Alarm(Sensor device){
       sendSMS("ALERT ACKNOWLEDGED.");
       acknowledge = true;
       device.state = Asleep;
-      loadPayload(device, GoToSleep);
+      loadPayload(device, GoSilent);
       sendPayload(address);
       return;
     }
