@@ -469,6 +469,7 @@ Sensor AlarmOn(Sensor device){
   }
 
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
+  acknowledge = false;
   return device;
 }
 
@@ -614,7 +615,7 @@ void Help(boolean debug){
 void Alarm(Sensor device){
   int count = 1800000;
   int loops = 0;
-  int acknowledge = false;
+  
 
   while(!(acknowledge) && loops < 3){
     count++;

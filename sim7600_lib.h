@@ -36,6 +36,7 @@ inline const int MESSAGE_WAIT_TIMEOUT = 60000;
 inline String cmd = "AT+CMGS=\"" + phoneNum + "\"";
 inline char buffer[64];                                  //For notifications
 inline boolean POOR_CONNECTION = false;
+inline boolean acknowledge = false;
 
 // struct for unit data storage
   struct Sensor{
