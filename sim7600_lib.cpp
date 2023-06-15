@@ -446,11 +446,11 @@ Sensor AlarmOn(Sensor device){
   device.state = Armed;
 
   // SEND COMMAND TO ARM TO RADIO
-  // loadPayload(device, GoToArm)
-  // if(!sendPayload){
-  //   sendSMS("Failed to arm.");
-  //   return device;  
-  // }
+  loadPayload(device, GoToArm);
+  if(!sendPayload(address)){
+    sendSMS("Failed to arm.");
+    return device;  
+  }
 
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
   return device;
@@ -643,7 +643,8 @@ void setDeviceAddress(){
     ID = i+1;
     char c = ID + '0';
     char new_address[6] = {'0','0','0','0', c};
+    //strcpy(device[i].address, new_address);
     strcpy(device[i].address, new_address);
-    if(DEBUG){ SerialUSB.println("Device "+ String(ID) +" address: "+ device[i].address);}
+    if(DEBUG){ SerialUSB.println("Device "+ String(ID) +" address: "+ String(device[i].address));}
   }
 }

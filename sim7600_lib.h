@@ -49,7 +49,7 @@ inline boolean POOR_CONNECTION = false;
     String name = "";
     String datetime = "";
     int configured = 0;
-    char address[6] = "00000";
+    char address[6];
   };
 inline Sensor device[4];
 

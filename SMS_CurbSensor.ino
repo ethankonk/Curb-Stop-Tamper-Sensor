@@ -46,10 +46,6 @@ void setup() {
   pinPeripheral(12, PIO_SERCOM);
   pinPeripheral(13, PIO_SERCOM);
 
-  if(!radio.begin(&rfSPI)){SerialUSB.println("Radio failed to start");}   // initialize radio.
-  radio.setDataRate(RF24_1MBPS);                                          // set high data rate for longer distance.
-  radio.setPALevel(RF24_PA_HIGH);  
-
   pinMode(LTE_RESET_PIN, OUTPUT);                                        
   digitalWrite(LTE_RESET_PIN, LOW);
 
@@ -87,6 +83,8 @@ void setup() {
   clearSMS(DEBUG);                                                // clear up SMS storage
   delay(100);
 
+  configureRadio(address);
+
   SerialUSB.println("SMS TESTING START!");
   sendSMS("SIM7600 Online!");                              // test send message
   if(POOR_CONNECTION){  sendSMS("WARNING! POOR LTE CONNECTION. MESSAGES MAY TAKE LONGER TO SEND.");}
@@ -94,24 +92,21 @@ void setup() {
   delay(100);
 }
 
-int count = 0;
 void loop() {
   updateSMS(0);
 
-  //   for(int i=0; i<3; i++){
-  //     if(device[i].configured)
-  //       
-  //       if(getPayload(device[i].RFaddress))
-  //        device[i] = storeStatus(device[i]);
-  
-  //        if(device[i].state == Alarming)
-  //          Alarm(device[i], DEBUG);
-         
-  //   }
+  //for(int i=0; i<3; i++){
+    //if(device[i].configured)
+  if(getPayload(address)){
+    device[0] = storeStatus(device[0]);
+    DumpDatabase(device[0]);
+  }
+  if(device[0].state == Alarming)
+    Alarm(device[0]);     
+  //}
 
   
   delay(1);
-  count++;
 }
 
 

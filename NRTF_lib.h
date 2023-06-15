@@ -80,11 +80,11 @@ inline payloadtype Message;
 inline unsigned long lastSignalMillis = 0;
 
 boolean getPayload(const byte address[]);
-boolean sendPayload(char address[]);
-boolean pingRF(char address[]);
-boolean configureRadio();
-void loadPayload(Sensor device);
-void DumpDatabase();
+boolean sendPayload(const byte address[]);
+boolean pingRF(const byte address[]);
+boolean configureRadio(const byte address[]);
+void loadPayload(Sensor device, byte message_type);
+void DumpDatabase(Sensor device);
 
 
 #endif  /* NRTF_LIB_H */
