@@ -455,18 +455,18 @@ Sensor AlarmOn(Sensor device){
     sendSMS("Failed to load config.");
     return device;  
   }
-  delay(1000);
+  delay(10000);
   loadPayload(device, GoToArm);
   if(!sendPayload(address)){
     sendSMS("Failed to arm.");
     return device;
   }
   delay(2000);
-  if(Message.State == CantArm){ 
-    sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
-    loadPayload(device, GoToSleep);
-    if(!sendPayload(address)){  sendSMS("EVERYTHING IS FALLING APART AAAAAAAAAAAAA"); return device;}
-  }
+  // if(Message.State == CantArm){ 
+  //   sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
+  //   loadPayload(device, GoToSleep);
+  //   if(!sendPayload(address)){  sendSMS("EVERYTHING IS FALLING APART AAAAAAAAAAAAA"); return device;}
+  // }
 
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
   acknowledge = false;

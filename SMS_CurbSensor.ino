@@ -91,7 +91,7 @@ void loop() {
     device[0] = storeStatus(device[0]);
     //sendCMD("AT+CGMM", 1000, DEBUG);
   }
-  if((device[0].state == Alarming) && !acknowledge)
+  if((device[0].state == Alarming))
     Alarm(device[0]);     
   //}
 

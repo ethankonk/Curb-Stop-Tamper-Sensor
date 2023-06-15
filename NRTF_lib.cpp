@@ -119,3 +119,16 @@ void loadPayload(Sensor device, byte message_type){
   payload.AlarmDelay = 0;
   payload.MessageCount = 0;
 }
+
+boolean pingRF(const byte address[]){
+  loadPayload(device[0], ReqStatus);
+  if(!sendPayload(address)){ sendSMS("Device unavailable. Failed send."); return false;}
+  delay(5000);
+  if(!getPayload(address)){ sendSMS("Device unavailable. No message returned."); return false;}
+  
+  device[0] = storeStatus(device[0]);
+  device[0].status = ACTIVE;
+
+  sendSMS("Device Online. Ping succesful.");
+  return true;
+}
