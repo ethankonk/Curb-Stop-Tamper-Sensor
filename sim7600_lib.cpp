@@ -462,7 +462,6 @@ Sensor AlarmOn(Sensor device){
     return device;
   }
   delay(2000);
-  if(!getPayload(address)){ sendSMS("Failed to reach module. Arming canceled."); return device;}
   if(Message.State == CantArm){ 
     sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
     loadPayload(device, GoToSleep);
