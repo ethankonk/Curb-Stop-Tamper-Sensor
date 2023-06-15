@@ -331,7 +331,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
 
     sendSMS("What is the address of the installation of s"+ String(device.ID) +"?");
 
-    while(userResponse.equals(""))
+    while(userResponse.equals("") && time > millis())
       userResponse = updateSMS(1);
 
     device.name = userResponse;
@@ -382,7 +382,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     sendSMS("RECONFIGURING...");
     userResponse = "";
   }//while
-  sendSMS("s"+ String(device.ID) +" Configuration Timeout...");
+  sendSMS("s"+ String(device.ID) +" configuration canceled. Proccess timed out.");
   return device;
 }//function
 
