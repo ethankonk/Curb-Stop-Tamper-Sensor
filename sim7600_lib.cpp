@@ -587,6 +587,7 @@ void Help(boolean debug){
   sendSMS("Command Type: status\n USAGE EXAMPLE: s# status");
   sendSMS("Command Type: configure\n USAGE EXAMPLE: s# configure");
   sendSMS("Command Type: disarm\n USAGE EXAMPLE: s# disarm");
+  sendSMS("Command Type: arm\n  Usage Example: s# arm");
   sendSMS("Type \"help\" if you ever need this list of commands again.");
 }
 

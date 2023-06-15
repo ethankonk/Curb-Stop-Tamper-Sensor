@@ -90,10 +90,8 @@ void setup() {
   SerialUSB.println("SMS TESTING START!");
   sendSMS("SIM7600 Online!");                              // test send message
   if(POOR_CONNECTION){  sendSMS("WARNING! POOR LTE CONNECTION. MESSAGES MAY TAKE LONGER TO SEND.");}
-  sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\nhelp");
+  sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\ns# arm\nhelp");
   delay(100);
-
-  Alarm(device[1]);
 }
 
 int count = 0;
