@@ -437,11 +437,22 @@ Sensor ReqCommand(String cmd, Sensor device, boolean debug){
     SAME CHANGES TO BE MADE                               */
 Sensor AlarmOn(Sensor device, boolean debug){
   String message;
-  sendSMS("s"+ String(device.ID) +" is now ARMED.");
 
+  if(!device.configured){
+    sendSMS("S"+ String(device.ID) +" has not been configured yet. Arming canceled.");
+    return device;
+  }
   device.status = ACTIVE;
   device.state = Armed;
-  
+
+  // SEND COMMAND TO ARM TO RADIO
+  // loadPayload(device, GoToArm)
+  // if(!sendPayload){
+  //   sendSMS("Failed to arm.");
+  //   return device;  
+  // }
+
+  sendSMS("s"+ String(device.ID) +" is now ARMED.");
   return device;
 
 }
