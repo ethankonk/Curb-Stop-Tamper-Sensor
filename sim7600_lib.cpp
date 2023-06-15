@@ -25,6 +25,7 @@ boolean sendSMS(String message){
     delay(1);
     if(timeout < millis()){                                                  
       SerialUSB.print("\nVERY POOR CONNECTION!");
+      POOR_CONNECTION = true;
       timeout += 10000;
     }
   }
@@ -381,7 +382,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     sendSMS("RECONFIGURING...");
     userResponse = "";
   }//while
-  sendSMS("s"+ String(device.ID) +" POWERING OFF.");
+  sendSMS("s"+ String(device.ID) +" Configuration Timeout...");
   return device;
 }//function
 
@@ -417,11 +418,13 @@ Sensor ReqCommand(String cmd, Sensor device, boolean debug){
   if(message.indexOf("silent") == 0 || message.indexOf("Silent") == 0){
     sendSMS("Device set to SILENT.");                                     // *IMPORTANT* make this actually update state to silent mode
     device.status = INACTIVE;
+    device.state = GoSilent;
   }
 
   if(message.indexOf("sleep") == 0 || message.indexOf("Sleep") == 0){
     sendSMS("Device set to SLEEP.");
     device.status = INACTIVE;
+    device.state = GoToSleep;
   }
 
   return device;
@@ -449,28 +452,32 @@ Sensor Disarm(Sensor device, boolean debug){
   String message;
   int x = 1;
 
+  if(!device.configured){ 
+    sendSMS("S"+ String(device.ID) +" has not been configured yet. Disarm canceled.");
+    return device;
+  }
+
   sendSMS("----- DISARMING -----\nDevice: s"+ String(device.ID) 
          +"\nAddress: "+ device.name 
          +"\nAre you sure you would like to disarm s"+ String(device.ID) +"? (y or n)");
 
-  while(message.equals("NORESPONSE")){
+  while(1){       //MAKE THIS TIMEOUT
     message = getYN(1000, debug);
 
-    if(message.indexOf("y") == 0){
-      device.state = NullState;
+    if(message.equals("y")){
+      device.state = GoToSleep;
       device.status = INACTIVE;
-      device.light = 0;
-      device.tilt = 0;
-      device.conductivity = 0;
-      device.name = "";
+      device.light = OFF;
+      device.tilt = OFF;
+      device.conductivity = OFF;
       device.configured = 0;
 
       sendSMS("s"+ String(device.ID) +" disarmed.");
-      x = 0;
+      break;
     }
-    else if(message.indexOf("n") == 0){
+    else if(message.equals("n") == 0){
       sendSMS("Disarm canceled");
-      x = 0;
+      break;
     }
   }
 
@@ -484,7 +491,7 @@ Sensor Disarm(Sensor device, boolean debug){
 
 /*Gives all devices an ID*/ 
 void setDeviceID(){
-  for(int i = 0; i < 3; i++){
+  for(int i = 0; i <= 3; i++){
     device[i].ID = i+1;
     if (DEBUG){SerialUSB.println("Device "+ String(i) +" ID: "+ String(device[i].ID));}
   }
@@ -561,34 +568,6 @@ String getYN(int time, boolean debug){
 
 
 
-/*OLD FUNCTION FOR GETTING READYING THE CURB UNIT*/
-// boolean getReadyInstall(Sensor device, boolean debug){
-//   long int time = millis();
-//   const long int timeout = 1800000;
-//   String response = "";
-//   int loop = 1;
-
-//   sendSMS("Changes Saved! Type \"r\" when s"+ String(device.ID) +" is succesfully installed.\nIF NO RESPONSE IS RECIEVED WITHIN 30 MINUTES S"+ String(device.ID) + " WILL POWER OFF.");
-//   while((time + timeout) > millis() && loop){
-//     response = updateSMS(1, debug);
-
-//     if(response.equals(""))
-//       continue;
-    
-//     else if(response.indexOf("r") == 0 || response.indexOf("R") == 0){
-//       sendSMS("Curb Unit Armed.");
-//       SerialUSB.println("THINGY WORKS :)");
-//       return true;
-//     }
-//     else{
-//       sendSMS("Please respond with \"r\" to signal the Unit is installed and ready to be activated.");
-//     }
-//   }// while
-//   return false;
-// }
-
-
-
 void Help(boolean debug){
   sendSMS("----- Help List -----");  
   sendSMS("Command Type: status\n USAGE EXAMPLE: s# status");
@@ -644,10 +623,11 @@ Sensor storeStatus(Sensor device){
 void setDeviceAddress(){
   int ID;
 
-  for(int i = 0; i < 3; i++){
+  for(int i = 0; i <= 3; i++){
     ID = i+1;
-    char new_address[6] = {'0','0','0','0','char(ID)'};
-    if(DEBUG){ SerialUSB.println("Device "+ String(ID) +" address: "+ new_address);}
+    char c = ID + '0';
+    char new_address[6] = {'0','0','0','0', c};
     strcpy(device[i].address, new_address);
+    if(DEBUG){ SerialUSB.println("Device "+ String(ID) +" address: "+ device[i].address);}
   }
 }

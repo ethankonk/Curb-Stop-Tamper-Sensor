@@ -38,7 +38,6 @@ IMPORTANT INFORMATION
 String response = "";
 
 void setup() {
-  setDeviceID();
 
   SerialUSB.begin(115200);                                                // initialize the USB serial port.
   Serial1.begin(115200);                                                  // initialize the SIM7600 module (Hardwired to Serial1).
@@ -65,6 +64,8 @@ void setup() {
   digitalWrite(LTE_FLIGHT_PIN, LOW);
 
   SerialUSB.println("Initializing...");
+  setDeviceID();
+  setDeviceAddress();
 
   delay(100);
 
@@ -88,6 +89,7 @@ void setup() {
 
   SerialUSB.println("SMS TESTING START!");
   sendSMS("SIM7600 Online!");                              // test send message
+  if(POOR_CONNECTION){  sendSMS("WARNING! POOR LTE CONNECTION. MESSAGES MAY TAKE LONGER TO SEND.");}
   sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\nhelp");
   delay(100);
 }

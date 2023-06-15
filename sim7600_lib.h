@@ -35,6 +35,7 @@ inline String phoneNum = "+12269357857";
 inline const int MESSAGE_WAIT_TIMEOUT = 60000;
 inline String cmd = "AT+CMGS=\"" + phoneNum + "\"";
 inline char buffer[64];                                  //For notifications
+inline boolean POOR_CONNECTION = false;
 
 // struct for unit data storage
   struct Sensor{
