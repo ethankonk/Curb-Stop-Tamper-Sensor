@@ -40,11 +40,11 @@ boolean sendSMS(String message){
 
   if(serial.indexOf("ERROR") != -1 || response.indexOf("ERROR") != -1){
     if(DEBUG){SerialUSB.println(response);}
-    SerialUSB.println("Failed to send message");
+    SerialUSB.println("Failed to send message.");
     return false;
     }
   else
-    SerialUSB.println("Message sent successfully");
+    SerialUSB.println("Message sent successfully.");
     return true;
 }
 
