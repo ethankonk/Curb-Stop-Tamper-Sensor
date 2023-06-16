@@ -466,7 +466,7 @@ Sensor AlarmOn(Sensor device){
   }
   delay(5000);
   if(!getPayload(address)){ sendSMS("Failed to reach module."); return device;}
-  
+
   if(Message.State == CantArm){ 
     sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
     loadPayload(device, GoToSleep);
@@ -627,8 +627,8 @@ void Help(boolean debug){
 
 
 void Alarm(Sensor device){
-  int count = 1800000;
-  int loops = 0;
+  int count = 1800000;                                        // starts at 10 min so that the first alert goes through.
+  int loops = 0;                                              // 3 alerts go out, counts the amount of loops Alarm goes through.
   
 
   while(!(acknowledge) && loops < 3){
@@ -637,7 +637,6 @@ void Alarm(Sensor device){
       SerialUSB.println("Acknowledgement Received");
       sendSMS("ALERT ACKNOWLEDGED.");
       acknowledge = true;
-      device.state = Asleep;
       loadPayload(device, GoSilent);
       sendPayload(address);
       return;
