@@ -95,16 +95,24 @@ void loop() {
   updateSMS(0);
 
   //for(int i=0; i<3; i++){
-    //if(device[i].configured)
-  if(getPayload(address)){
-    device[0] = storeStatus(device[0]);
-    //sendCMD("AT+CGMM", 1000, DEBUG);
-  }
+    //if(device[i].configured){
+    if(getPayload(address)){
+      device[0] = storeStatus(device[0]);
+      device[0].timeout = 0;
+    }
+
+    if(device[0].timeout >= 2700000){
+      sendSMS("s"+ String(device[0].ID) +" has not given a status update in 2 hours.");
+      device[0].timeout = 0;
+    }
+
+    (device[0].timeout)++;
+    //}
+  //}
   if((device[0].state == Alarming))
     Alarm(device[0]);     
-  //}
-
   
+
   delay(1);
 }
 

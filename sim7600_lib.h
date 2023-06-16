@@ -33,7 +33,6 @@
 // MISC. variables
 inline String phoneNum = "+12269357857";
 inline const int MESSAGE_WAIT_TIMEOUT = 60000;
-inline String cmd = "AT+CMGS=\"" + phoneNum + "\"";
 inline char buffer[64];                                  //For notifications
 inline boolean POOR_CONNECTION = false;
 inline boolean acknowledge = false;
@@ -50,6 +49,7 @@ inline boolean acknowledge = false;
     String name = "";
     String datetime = "";
     int configured = 0;
+    unsigned long int timeout = 0;
     char address[6];
   };
 inline Sensor device[4];

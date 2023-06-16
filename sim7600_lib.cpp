@@ -10,6 +10,7 @@ boolean sendSMS(String message){
   unsigned int timeout = 10000;
   unsigned long int time = millis();
   timeout = time + timeout;
+  String cmd = "AT+CMGS=\"" + phoneNum + "\"";
 
   sendCMD(cmd, 1000, DEBUG);                                                // sends " AT+CMGS= "+12269357857" " (Will have to make function to change phone#)
   delay(100);
@@ -271,6 +272,34 @@ boolean checkSMS(String message, int slot, boolean debug){
   else if(message.indexOf("help") == 0){
     Help(debug);
   }// else if
+
+
+  else if(message.indexOf("changenum") == 0){
+    String new_phone_number = message;
+    int first = new_phone_number.indexOf("\"");
+    first++;
+    new_phone_number.remove(0, first);
+    int last = new_phone_number.indexOf("\"");
+    last;
+    new_phone_number.remove(last, 20);
+
+    if(DEBUG){  SerialUSB.println("New phone number: "+ new_phone_number);}
+
+    sendSMS("Are you sure you would like to change the phone number too: "+ new_phone_number);
+
+    String response = getYN(600000);
+    if(response.equals("NORESPONSE")){ sendSMS("Process timed out. Changenum canceled."); return false;}
+
+
+    if(response.equals("y")){
+      sendSMS("Phone number changed.");
+      phoneNum = new_phone_number;
+      SerialUSB.println(phoneNum);
+      Help(debug);
+      return true;
+    }
+    else if(response.equals("n")){ sendSMS("Changenum canceled."); return true;}
+  }
 
 
   else{                                                             // if message none of the above, function returns false which signals
