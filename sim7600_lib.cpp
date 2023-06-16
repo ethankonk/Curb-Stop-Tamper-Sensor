@@ -445,6 +445,7 @@ Sensor AlarmOn(Sensor device){
     sendSMS("S"+ String(device.ID) +" has not been configured yet. Arming canceled.");
     return device;
   }
+  sendSMS("Arming s"+ String(device.ID) +". This may take a few moments.");
   device.status = ACTIVE;
   device.state = Armed;
 
@@ -454,14 +455,18 @@ Sensor AlarmOn(Sensor device){
     sendSMS("Failed to load config.");
     return device;  
   }
-  delay(6000);
+  while(Message.Mode != WaitForCmd)
+    getPayload(address);
+
+  delay(100);
   loadPayload(device, GoToArm);
   if(!sendPayload(address)){
     sendSMS("Failed to arm.");
     return device;
   }
   delay(5000);
-  // if(!getPayload(address)){ sendSMS("Failed to reach module."); return device;}
+  if(!getPayload(address)){ sendSMS("Failed to reach module."); return device;}
+  
   if(Message.State == CantArm){ 
     sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
     loadPayload(device, GoToSleep);
