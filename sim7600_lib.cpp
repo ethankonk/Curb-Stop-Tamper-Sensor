@@ -263,7 +263,7 @@ boolean checkSMS(String message, int slot, boolean debug){
     }
     
     else if(message.indexOf("ping") == 0){
-      if(!device[ID-1].configured){
+      if(!(device[ID-1].configured)){
         sendSMS("S"+ String(device[ID-1].ID) +" has not been configured yet. Ping canceled.");
         return false;
       }
@@ -613,7 +613,7 @@ String getDateTime(){
   int first = date.indexOf("\"");
   int last = date.indexOf("\"");
   date.remove(0, first+1);
-  date.remove(last-1, 20);
+  date.remove(last-3, 20);
   date.trim();
 
   if (DEBUG){SerialUSB.println(date);}

@@ -31,7 +31,7 @@
 #include <Arduino.h>
 
 // MISC. variables
-inline String phoneNum = "+2269357857";
+inline String phoneNum = "+5198194546";
 inline const int MESSAGE_WAIT_TIMEOUT = 60000;
 inline char buffer[64];                                  //For notifications
 inline boolean POOR_CONNECTION = false;
