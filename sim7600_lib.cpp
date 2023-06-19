@@ -264,7 +264,7 @@ boolean checkSMS(String message, int slot, boolean debug){
     
     else if(message.indexOf("ping") == 0){
       if(DEBUG){SerialUSB.println("SENDING CODE 4");}
-      SerialUSB.println((pingRF ? "Ping Success" : "Ping Failed"));
+      SerialUSB.println((pingRF(address) ? "Ping Success" : "Ping Failed"));
     }
     else{
       sendSMS("ERROR: Unknown command.\nPlease type \"help\" for list of valid commands.");
@@ -409,7 +409,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
 
     if(userResponse.equals("n")){
       sendSMS("S"+ String(device.ID) +" Configuration Saved.");
-      sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\ns# arm\nhelp");
+      sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\ns# arm\ns# ping\nhelp");
       device.configured = 1;
       clearSMS();                 
       return device;
@@ -488,8 +488,21 @@ Sensor AlarmOn(Sensor device){
     sendSMS("Failed to load config.");
     return device;  
   }
-  while(Message.Mode != WaitForCmd)
-    getPayload(address);
+
+  while(!(getPayload(address)));
+
+  switch(Message.Mode){
+    case WaitForCmd:
+      break;
+    case CommsFail:
+      sendSMS("Failed to arm. Could not communicate with the device.");
+      return device;
+    case CantArm:
+      sendSMS("Failed to arm. Make sure sensors are not activated while arming.");
+      return device;
+  }
+
+
 
   delay(100);
   loadPayload(device, GoToArm);
@@ -504,6 +517,7 @@ Sensor AlarmOn(Sensor device){
     sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
     loadPayload(device, GoToSleep);
     if(!sendPayload(address)){  sendSMS("EVERYTHING IS FALLING APART AAAAAAAAAAAAA"); return device;}
+    return device;
   }
 
   sendSMS("s"+ String(device.ID) +" is now ARMED.");

@@ -7,8 +7,6 @@
 #include "NRTF_lib.h"
 
 boolean getPayload(const byte address[6]){
-  
-  radio.startListening();
 
   if(radio.available() > 0){
 
@@ -58,8 +56,7 @@ boolean sendPayload(const byte address[6]){
     SerialUSB.print("Message send failure. ");
     SerialUSB.println("Reconfiguring radio.");
     configureRadio(address);
-    radio.stopListening();
-
+    return SentOk;
   }
   radio.startListening();
   return SentOk;
@@ -121,12 +118,21 @@ void loadPayload(Sensor device, byte message_type){
 
 boolean pingRF(const byte address[]){
   unsigned long int time = millis();
+  long int timeout = 15000;
   long int time_spent = 0;
 
   loadPayload(device[0], ReqStatus);
   if(!sendPayload(address)){ sendSMS("Device unavailable. Failed send."); return false;}
-  delay(5000);
-  if(!getPayload(address)){ sendSMS("Device unavailable. No message returned."); return false;}
+
+  unsigned long int time2 = millis();
+  while((radio.available() == 0) && (millis() < timeout+time2)){
+    SerialUSB.print(".");
+    delay(1);
+  }
+
+  SerialUSB.println(radio.available());
+
+  if(!getPayload(address)){ sendSMS("Device unavailable. Device timed out, no message returned."); return false;}
   
   device[0] = storeStatus(device[0]);
   device[0].status = ACTIVE;
