@@ -261,7 +261,11 @@ boolean checkSMS(String message, int slot, boolean debug){
       device[ID-1] = AlarmOn(device[ID-1]);
       return true;
     }
-
+    
+    else if(message.indexOf("ping") == 0){
+      if(DEBUG){SerialUSB.println("SENDING CODE 4");}
+      SerialUSB.println((pingRF ? "Ping Success" : "Ping Failed"));
+    }
     else{
       sendSMS("ERROR: Unknown command.\nPlease type \"help\" for list of valid commands.");
       return false;

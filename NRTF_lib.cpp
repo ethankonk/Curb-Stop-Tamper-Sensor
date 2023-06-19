@@ -120,6 +120,9 @@ void loadPayload(Sensor device, byte message_type){
 }
 
 boolean pingRF(const byte address[]){
+  unsigned long int time = millis();
+  long int time_spent = 0;
+
   loadPayload(device[0], ReqStatus);
   if(!sendPayload(address)){ sendSMS("Device unavailable. Failed send."); return false;}
   delay(5000);
@@ -128,6 +131,7 @@ boolean pingRF(const byte address[]){
   device[0] = storeStatus(device[0]);
   device[0].status = ACTIVE;
 
-  sendSMS("Device Online. Ping succesful.");
+  time_spent = millis() - time;
+  sendSMS("Device Online. Ping succesful. Time spent: "+ String(time_spent) +" ms.");
   return true;
 }

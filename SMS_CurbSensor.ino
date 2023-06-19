@@ -23,7 +23,7 @@ Water Curb Box Sensor
 
 // debug toggle
 #define DEBUG false
-#define DEBUGGING_ALARM true
+#define DEBUGGING_ALARM false
 
 // MISC. variables
 String response = "";
