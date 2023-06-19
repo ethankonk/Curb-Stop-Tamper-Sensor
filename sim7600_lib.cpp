@@ -263,9 +263,15 @@ boolean checkSMS(String message, int slot, boolean debug){
     }
     
     else if(message.indexOf("ping") == 0){
+      if(!device[ID-1].configured){
+        sendSMS("S"+ String(device[ID-1].ID) +" has not been configured yet. Ping canceled.");
+        return false;
+      }
+
       if(DEBUG){SerialUSB.println("SENDING CODE 4");}
       sendSMS("Pinging...");
       SerialUSB.println((pingRF(address) ? "Ping Success" : "Ping Failed"));
+      return true;
     }
     else{
       sendSMS("ERROR: Unknown command.\nPlease type \"help\" for list of valid commands.");
