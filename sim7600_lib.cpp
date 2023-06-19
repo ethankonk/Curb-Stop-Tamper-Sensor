@@ -264,6 +264,7 @@ boolean checkSMS(String message, int slot, boolean debug){
     
     else if(message.indexOf("ping") == 0){
       if(DEBUG){SerialUSB.println("SENDING CODE 4");}
+      sendSMS("Pinging...");
       SerialUSB.println((pingRF(address) ? "Ping Success" : "Ping Failed"));
     }
     else{
