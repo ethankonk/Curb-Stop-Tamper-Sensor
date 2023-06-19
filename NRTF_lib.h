@@ -49,15 +49,12 @@ inline static SPIClassSAMD rfSPI (&sercom1, 28, 26, 25, SPI_PAD_0_SCK_1, SERCOM_
 // SCK D13 PA17 26 Pad1
 
 // radio stuff
-#define SEND 0
-#define GET 1
 #define CE_PIN 3
 #define CSN_PIN 4
 inline RF24 radio(CE_PIN, CSN_PIN);
 
 
 inline const byte address[6] = "00001";
-inline boolean radioMode;                         // false: transmitting | true: listening
 
 // NRF24L01 buffer limit is 32 bytes (max struct size)
 struct payloadtype { 

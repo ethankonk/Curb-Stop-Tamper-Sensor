@@ -45,7 +45,6 @@ boolean sendPayload(const byte address[6]){
 
   radio.stopListening();
   delay(500);
-  radioMode = SEND;   // radio set to "transmitting"
   while ((!SentOk) && (Retry<6)){  
     SentOk = radio.write(&payload, sizeof(payload));
     Retry++;
@@ -99,7 +98,6 @@ boolean configureRadio(const byte address[6]){
   radio.openWritingPipe(address);
 
   radio.startListening();
-  radioMode = SEND;  
   return true;    
 }
 

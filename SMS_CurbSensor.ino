@@ -95,23 +95,26 @@ void loop() {
   updateSMS(0);
 
   //for(int i=0; i<3; i++){
-    //if(device[i].configured){
+  if(device[0].configured){
     if(getPayload(address)){
       device[0] = storeStatus(device[0]);
       device[0].timeout = 0;
+      
+      if(device[0].BatLevel <= 25)
+        sendSMS("<<LOW BATTERY LEVEL>>\nDevice "+ String(device[0].ID) +" is at "+ device[0].BatLevel +"% battery remaining.");
     }
 
-    if(device[0].timeout >= 2700000){
+    else if(device[0].timeout >= 7200000){
       sendSMS("s"+ String(device[0].ID) +" has not given a status update in 2 hours.");
       device[0].timeout = 0;
     }
 
     (device[0].timeout)++;
-    //}
-  //}
+  }
+
   if((device[0].state == Alarming))
-    Alarm(device[0]);     
-  
+    Alarm(device[0]);
+  //}
 
   delay(1);
 }
