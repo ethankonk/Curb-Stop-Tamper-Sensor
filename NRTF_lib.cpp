@@ -90,7 +90,7 @@ boolean configureRadio(const byte address[6]){
     return false;
     }
   radio.setDataRate(RF24_1MBPS);                 // set high data rate for longer distance.
-  radio.setPALevel(RF24_PA_HIGH);
+  radio.setPALevel(RF24_PA_MAX);
   radio.openReadingPipe(0, address);
   radio.openWritingPipe(address);
 
