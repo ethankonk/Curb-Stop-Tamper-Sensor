@@ -338,6 +338,7 @@ void Status(Sensor device, boolean debug){
   message = ("----- Status -----\nDevice ID: "+ String(device.ID) 
             +"\nName: "+ device.name 
             +"\nStatus: "+ (device.status ? "ACTIVE" : "INACTIVE")
+            +"\nState: "+ state
             +"\nLast Updated: "+ device.datetime
             +"\nBattery Level: "+ device.BatLevel +"%");
   sendSMS(message);
@@ -375,7 +376,9 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       device.conductivity = OFF; 
       device.light = OFF; 
       device.tilt = OFF; 
-      device.configured = 0;}
+      device.name = "";
+      device.configured = 0;
+    }
 
     else if(userResponse.equals("n")){
       sendSMS("S"+ String(device.ID) +" configuration canceled.");
@@ -444,7 +447,17 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       }
 
       // check for succesful send.
-      while(!(getPayload(address)));
+      unsigned long int time2 = millis();
+      unsigned int timeout2 = 15000;
+      time2 = time2+timeout2;
+      while(!(getPayload(address))){
+        if(millis()>time2){
+          sendSMS("Radio failed to respond. Configure canceled.");
+          return device;
+        }
+      }
+
+      // check for proper reply
       switch(Message.Mode){
         case WaitForCmd:
           break;
@@ -465,7 +478,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     }
 
     sendSMS("RECONFIGURING...");
-    device.conductivity = OFF; device.light = OFF; device.tilt = OFF;
+    device.conductivity = OFF; device.light = OFF; device.tilt = OFF; device.name = "";
     userResponse = "";
   }//while
   sendSMS("S"+ String(device.ID) +" configuration canceled. Proccess timed out.");
@@ -559,8 +572,6 @@ Sensor AlarmOn(Sensor device){
 
   if(Message.State == CantArm){ 
     sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
-    loadPayload(device, GoToSleep);
-    if(!sendPayload(address)){  sendSMS("EVERYTHING IS FALLING APART AAAAAAAAAAAAA"); return device;}
     return device;
   }
 
