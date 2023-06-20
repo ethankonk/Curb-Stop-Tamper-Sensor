@@ -332,8 +332,8 @@ boolean checkSMS(String message, int slot, boolean debug){
 */
 void Status(Sensor device, boolean debug){
   String message;
-  String config;                                                        // going to change.
-  config = CurrConfig(device);
+  String config = CurrConfig(device);
+  String state = CurrState(device);
 
   message = ("----- Status -----\nDevice ID: "+ String(device.ID) 
             +"\nName: "+ device.name 
@@ -487,6 +487,23 @@ String CurrConfig(Sensor device){
   return message;
 }
 
+
+String CurrState(Sensor device){
+
+  switch(Message.State){
+    case NullState: return "Null State";
+    case Asleep:  return "Asleep";
+    case Connecting:  return "Connecting";
+    case WaitForCmd:  return "Waiting for Cmd";
+    case Arming:  return "Arming";
+    case Armed: return "Armed";
+    case Alarming:  return "Alarming";
+    case CommsFail: return "Comms Fail";
+    case Configured:  return "Configured";
+    case AmSilent:  return "Silent";
+    case CantArm: return "Cant Arm";
+  }
+}
 
 
 /*  Sets the device to command requesting mode which 

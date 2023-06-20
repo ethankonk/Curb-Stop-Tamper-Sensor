@@ -60,6 +60,7 @@ String sendCMD(String cmd, const int timeout, boolean debug);
 String getYN(int time);
 String getDateTime();
 String CurrConfig(Sensor device);
+String CurrState(Sensor device);
 Sensor ReqCommand(String cmd, Sensor device, boolean debug);
 Sensor AlarmOn(Sensor device);
 Sensor Disarm(Sensor device);
