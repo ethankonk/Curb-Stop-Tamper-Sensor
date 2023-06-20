@@ -455,7 +455,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
           sendSMS("Failed to arm. Make sure sensors are not activated while arming.");
           return device;
       }
-      sendSMS("Config pushed too sensor succesfully!");
+      sendSMS("Config pushed succesfully!");
 
       // return to main menu.
       sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\ns# arm\ns# ping\nhelp");
@@ -555,9 +555,7 @@ Sensor AlarmOn(Sensor device){
 
 
 Sensor Disarm(Sensor device){
-  unsigned long long int time = millis();
   long int timeout = 600000;
-  time = time + timeout;
   String message;
 
   if(!device.configured){ 
@@ -569,22 +567,27 @@ Sensor Disarm(Sensor device){
          +"\nAddress: "+ device.name 
          +"\nAre you sure you would like to disarm s"+ String(device.ID) +"? (y or n)");
 
-  while(1){       //MAKE THIS TIMEOUT
+
+  unsigned long long int time = millis();
+  time = time + timeout;
+  while(time > millis()){       //MAKE THIS TIMEOUT
     message = getYN(time);
 
     if(message.equals("y")){
-      device.state = GoToSleep;
       device.status = INACTIVE;
-      device.light = OFF;
-      device.tilt = OFF;
-      device.conductivity = OFF;
-      device.configured = 0;
-
-      loadPayload(device, LoadParms);
-      sendPayload(address);
-      delay(10000);
       loadPayload(device, GoToSleep);
-      sendPayload(address);
+      if(!(sendPayload(address))){
+        sendSMS("Failed to communicate with the device. Disarm canceled.");
+        return device;
+      }
+      while(!(getPayload(address)));
+      switch(Message.State){
+        case Asleep:
+          break;
+        case CommsFail:
+          sendSMS("Failed to disarm. Could not communicate with the device.");
+          return device;
+      }
 
       // TELL SENSOR MODULE TOO DISARM.
       sendSMS("s"+ String(device.ID) +" disarmed.");
@@ -597,7 +600,7 @@ Sensor Disarm(Sensor device){
     }
 
     else if(message.equals("NORESPONSE")){
-      sendSMS("Disarm canceled. Process timed out.");
+      sendSMS("Process timed out. Disarm canceled.");
       break;
     }
   }
