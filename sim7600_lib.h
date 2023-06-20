@@ -59,7 +59,7 @@ String updateSMS(int mode);
 String sendCMD(String cmd, const int timeout, boolean debug);
 String getYN(int time);
 String getDateTime();
-String CurrConfig(Sensor device, boolean debug);
+String CurrConfig(Sensor device);
 Sensor ReqCommand(String cmd, Sensor device, boolean debug);
 Sensor AlarmOn(Sensor device);
 Sensor Disarm(Sensor device);

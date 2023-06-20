@@ -333,7 +333,7 @@ boolean checkSMS(String message, int slot, boolean debug){
 void Status(Sensor device, boolean debug){
   String message;
   String config;                                                        // going to change.
-  config = CurrConfig(device, debug);
+  config = CurrConfig(device);
 
   message = ("----- Status -----\nDevice ID: "+ String(device.ID) 
             +"\nName: "+ device.name 
@@ -343,7 +343,7 @@ void Status(Sensor device, boolean debug){
   sendSMS(message);
   SerialUSB.println(message);
   
-  message = CurrConfig(device, debug);
+  message = CurrConfig(device);
   sendSMS(message);
 
   SerialUSB.println(message);
@@ -361,11 +361,29 @@ Sensor ChangeConfig(Sensor device, boolean debug){
 
   time = time + timeout;
 
+  // process for device that is already configured
   if(device.configured){
-    sendSMS("This device has already been configured and cannot be modified. Please disarm the device and manually reboot it to reconfigure.");
-    return device;
+    sendSMS("This device has already been configured. Would you like too wipe the current configuration and reconfigure? y/n");
+    sendSMS(CurrConfig(device));
+    
+    // function timeout.
+    userResponse = getYN(time);
+    if(userResponse.equals("NORESPONSE")){  loop = 0;}
+
+    // wipe device database.
+    else if(userResponse.equals("y")){ 
+      device.conductivity = OFF; 
+      device.light = OFF; 
+      device.tilt = OFF; 
+      device.configured = 0;}
+
+    else if(userResponse.equals("n")){
+      sendSMS("S"+ String(device.ID) +" configuration canceled.");
+      return device;
+    }
   }
 
+  // device configuration process.
   while(time > millis() || loop){
 
     sendSMS("What is the address of the installation of s"+ String(device.ID) +"?");
@@ -406,21 +424,46 @@ Sensor ChangeConfig(Sensor device, boolean debug){
     sendSMS("OK.");
     delay(100);
 
-    message = CurrConfig(device, debug);
-    sendSMS(message);
+    sendSMS(CurrConfig(device));
 
     sendSMS("Would you like to make any changes? y/n");
     userResponse = getYN(time);
     if(userResponse.equals("NORESPONSE"))
       break;
 
+
+    // configure sensor.
     if(userResponse.equals("n")){
-      sendSMS("S"+ String(device.ID) +" Configuration Saved.");
+      sendSMS("S"+ String(device.ID) +" Configuration Saved. Pushing configuration, this may take a moment.");
+
+      // send parms too sensor.
+      loadPayload(device, LoadParms);
+      if(!sendPayload(address)){
+        sendSMS("Failed to load config.");
+        return device;  
+      }
+
+      // check for succesful send.
+      while(!(getPayload(address)));
+      switch(Message.Mode){
+        case WaitForCmd:
+          break;
+        case CommsFail:
+          sendSMS("Failed to arm. Could not communicate with the device.");
+          return device;
+        case CantArm:
+          sendSMS("Failed to arm. Make sure sensors are not activated while arming.");
+          return device;
+      }
+      sendSMS("Config pushed too sensor succesfully!");
+
+      // return to main menu.
       sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\ns# arm\ns# ping\nhelp");
       device.configured = 1;
       clearSMS();                 
       return device;
-    }//if
+    }
+
     sendSMS("RECONFIGURING...");
     device.conductivity = OFF; device.light = OFF; device.tilt = OFF;
     userResponse = "";
@@ -432,9 +475,8 @@ Sensor ChangeConfig(Sensor device, boolean debug){
 
 
 /*  Pushes the config made by the user and returns 
-    message to send to user by SMS. 
-    SAME CHANGES TO BE MADE                               */
-String CurrConfig(Sensor device, boolean debug){
+    message to send to user by SMS.               */
+String CurrConfig(Sensor device){
   String message;
   message = ("S"+ String(device.ID) 
             +" CURRENT SENSOR CONFIG:\n----- Config -----\nInstall Address: "+ device.name 
@@ -443,7 +485,7 @@ String CurrConfig(Sensor device, boolean debug){
             +"\nConductivity Sensor = "+ (device.conductivity ? "ON" : "OFF"));
 
   return message;
-}// function
+}
 
 
 
@@ -488,28 +530,6 @@ Sensor AlarmOn(Sensor device){
   sendSMS("Arming s"+ String(device.ID) +". This may take a few moments.");
   device.status = ACTIVE;
   device.state = Armed;
-
-  // SEND COMMAND TO ARM TO RADIO
-  loadPayload(device, LoadParms);
-  if(!sendPayload(address)){
-    sendSMS("Failed to load config.");
-    return device;  
-  }
-
-  while(!(getPayload(address)));
-
-  switch(Message.Mode){
-    case WaitForCmd:
-      break;
-    case CommsFail:
-      sendSMS("Failed to arm. Could not communicate with the device.");
-      return device;
-    case CantArm:
-      sendSMS("Failed to arm. Make sure sensors are not activated while arming.");
-      return device;
-  }
-
-
 
   delay(100);
   loadPayload(device, GoToArm);
