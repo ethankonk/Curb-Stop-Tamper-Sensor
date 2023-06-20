@@ -28,7 +28,8 @@ Water Curb Box Sensor
 // MISC. variables
 String response = "";
 
-void setup() {
+void setup() 
+{
 
   SerialUSB.begin(115200);                                                // initialize the USB serial port.
   Serial1.begin(115200);                                                  // initialize the SIM7600 module (Hardwired to Serial1).
@@ -58,13 +59,16 @@ void setup() {
 
   response = sendCMD("AT+CGMM", 3000, DEBUG);
 
-  while(response.indexOf("PB DONE") < 0 && response.indexOf("SIMCOM_SIM7600A-H") < 0){
-    if(Serial1.available()){
-      char c = Serial1.read();
-      response += c;
-      delay(1);
+  while(response.indexOf("PB DONE") < 0 && response.indexOf("SIMCOM_SIM7600A-H") < 0)
+    {
+
+      if(Serial1.available()){
+        char c = Serial1.read();
+        response += c;
+        delay(1);
+      }
+
     }
-  }
 
   delay(1000);
   sendCMD("AT+CMGF=1", 1000, DEBUG);                              // set SMS text mode
@@ -74,13 +78,13 @@ void setup() {
   clearSMS();                                                // clear up SMS storage
   delay(100);
 
-  configureRadio(address);
+  if(!configureRadio(address)){ sendSMS("Radio failed to Start!");}
 
   SerialUSB.println("SMS TESTING START!");
   sendSMS("SIM7600 Online!");                              // test send message
   if(POOR_CONNECTION){  sendSMS("WARNING! POOR LTE CONNECTION. MESSAGES MAY TAKE LONGER TO SEND.");}
   sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\ns# arm\ns# ping\nhelp");
-  delay(100);
+
 
   if(DEBUGGING_ALARM){
     SerialUSB.println("DEBUGGING ALARM");
@@ -89,9 +93,13 @@ void setup() {
     device[0].name = "123 main st";
     device[0].status = ACTIVE;
   }
+
+
 }
 
-void loop() {
+void loop() 
+{
+      
   updateSMS(0);
 
   //for(int i=0; i<3; i++){
@@ -117,6 +125,8 @@ void loop() {
   //}
 
   delay(1);
+
+
 }
 
 
