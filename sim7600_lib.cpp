@@ -446,14 +446,14 @@ Sensor ChangeConfig(Sensor device, boolean debug){
         sendSMS("Failed to load config.");
         return device;  
       }
-      // delay(5000);
-      // loadPayload(device, GoToSleep);
-      // if(!sendPayload(address)){
-      //   sendSMS("Failed to load config.");
-      //   return device;  
-      // }
+      delay(5000);
+      loadPayload(device, GoToSleep);
+      if(!sendPayload(address)){
+        sendSMS("Failed to load config.");
+        return device;  
+      }
 
-      // radio.flush_rx();
+      radio.flush_rx();
       // check for succesful send.
       unsigned long int time2 = millis();
       unsigned int timeout2 = 30000;
