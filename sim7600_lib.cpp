@@ -225,12 +225,12 @@ String sendCMD(String cmd, const int timeout, boolean debug){
 //  - message, message parsed from the user's SMS.
 //  - slot, message slot.
 //  - debug, debugging stuff.
-boolean checkSMS(String message, int slot, boolean debug){
+boolean checkSMS(String message, int slot, boolean debug) {
   String newMessage;
   int ID;
   message.toLowerCase();
   
-  if(message.indexOf("s") == 0){
+  if (message.indexOf("s") == 0) {
     ID = getID(message, debug);
     if(ID == -1)
       return false;
@@ -238,54 +238,52 @@ boolean checkSMS(String message, int slot, boolean debug){
     message.remove(0,3);
     SerialUSB.println("CMD Type: "+ message);
     
-    if(message.indexOf("status") == 0){                                  // checks for "status" cmd. 
-      if(debug){SerialUSB.println("SENDING STATUS");}
+    if (message.indexOf("status") == 0) {                                  // checks for "status" cmd. 
+      if(debug) SerialUSB.println("SENDING STATUS");
       Status(device[ID-1], DEBUG);                                       // calls Status() which returns a devices' status.
       return true;
     }//if
 
-    else if(message.indexOf("configure") == 0){                          // checks for "configure" cmd.
-      if(debug){SerialUSB.println("SENDING CODE 1");}
+    else if (message.indexOf("configure") == 0) {                          // checks for "configure" cmd.
+      if(debug) SerialUSB.println("SENDING CODE 1");
       device[ID-1] = ChangeConfig(device[ID-1], DEBUG);                  // calls 
       return true;
     }      
       
-    else if(message.indexOf("disarm") == 0){                             // checks for "2".
-      if(debug){SerialUSB.println("SENDING CODE 2");}
+    else if (message.indexOf("disarm") == 0) {                             // checks for "2".
+      if(debug) SerialUSB.println("SENDING CODE 2");
       device[ID-1] = Disarm(device[ID-1]);
       return true;
     }
 
-    else if(message.indexOf("arm") == 0){                                // checks for "alarming"
+    else if (message.indexOf("arm") == 0) {                                // checks for "alarming"
       if(debug){SerialUSB.println("SENDING CODE 3");}
       device[ID-1] = AlarmOn(device[ID-1]);
       return true;
     }
     
-    else if(message.indexOf("ping") == 0){
-      if(!(device[ID-1].configured)){
+    else if (message.indexOf("ping") == 0) {
+      if (!(device[ID-1].configured)) {
         sendSMS("S"+ String(device[ID-1].ID) +" has not been configured yet. Ping canceled.");
         return false;
       }
 
-      if(DEBUG){SerialUSB.println("SENDING CODE 4");}
+      if (DEBUG) SerialUSB.println("SENDING CODE 4");
       sendSMS("Pinging...");
       SerialUSB.println((pingRF(address) ? "Ping Success" : "Ping Failed"));
       return true;
     }
-    else{
+    else {
       sendSMS("ERROR: Unknown command.\nPlease type \"help\" for list of valid commands.");
       return false;
     }
   }// if(message.indexOf("s") == 0)
 
-
-  else if(message.indexOf("help") == 0){
+  else if (message.indexOf("help") == 0) {
     Help(debug);
   }// else if
 
-
-  else if(message.indexOf("changenum") == 0){
+  else if (message.indexOf("changenum") == 0) {
     String new_phone_number = message;
     int first = new_phone_number.indexOf("\"");
     first++;
@@ -294,29 +292,28 @@ boolean checkSMS(String message, int slot, boolean debug){
     last;
     new_phone_number.remove(last, 20);
 
-    if(DEBUG){  SerialUSB.println("New phone number: "+ new_phone_number);}
+    if (DEBUG) SerialUSB.println("New phone number: "+ new_phone_number);
 
     sendSMS("Are you sure you would like to change the phone number too: "+ new_phone_number);
 
     String response = getYN(600000);
-    if(response.equals("NORESPONSE")){ sendSMS("Process timed out. Changenum canceled."); return false;}
+    if (response.equals("NORESPONSE")) {sendSMS("Process timed out. Changenum canceled."); return false;}
 
 
-    if(response.equals("y")){
+    if (response.equals("y")) {
       sendSMS("Phone number changed.");
       phoneNum = new_phone_number;
       SerialUSB.println(phoneNum);
       Help(debug);
       return true;
     }
-    else if(response.equals("n")){ sendSMS("Changenum canceled."); return true;}
+    else if (response.equals("n")) { sendSMS("Changenum canceled."); return true;}
   }
 
 
-  else{                                                             // if message none of the above, function returns false which signals
+  else {                                                             // if message none of the above, function returns false which signals
     /*DEBUGGING*/                                                   // that nothing of value was received. WILL CHANGE TO DELETE MESSAGES (MAYBE).
-    if(debug)
-      SerialUSB.println("NOT AN OPTION");
+    if(debug) SerialUSB.println("NOT AN OPTION");
 
 
     message.trim();
@@ -330,7 +327,7 @@ boolean checkSMS(String message, int slot, boolean debug){
 /*  Gets the status of specified device. 
     NEED TO PRINT MORE STATUS STUFF. **CHANGE THIS LATER**
 */
-void Status(Sensor device, boolean debug){
+void Status (Sensor device) {
   String message;
   String config = CurrConfig(device);
   String state = CurrState(device);
@@ -353,7 +350,7 @@ void Status(Sensor device, boolean debug){
 
 
 /**/
-Sensor ChangeConfig(Sensor device, boolean debug){
+Sensor ChangeConfig (Sensor device) {
   String message;
   String userResponse = "";
   const int timeout = 600000;
@@ -363,16 +360,16 @@ Sensor ChangeConfig(Sensor device, boolean debug){
   time = time + timeout;
 
   // process for device that is already configured
-  if(device.configured){
+  if (device.configured) {
     sendSMS("This device has already been configured. Would you like too wipe the current configuration and reconfigure? y/n");
     sendSMS(CurrConfig(device));
     
     // function timeout.
     userResponse = getYN(time);
-    if(userResponse.equals("NORESPONSE")){  loop = 0;}
+    if (userResponse.equals("NORESPONSE")) loop = 0;
 
     // wipe device database.
-    else if(userResponse.equals("y")){ 
+    else if (userResponse.equals("y")) { 
       device.conductivity = OFF; 
       device.light = OFF; 
       device.tilt = OFF; 
@@ -380,7 +377,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       device.configured = 0;
     }
 
-    else if(userResponse.equals("n")){
+    else if (userResponse.equals("n")) {
       sendSMS("S"+ String(device.ID) +" configuration canceled.");
       return device;
     }
@@ -388,11 +385,11 @@ Sensor ChangeConfig(Sensor device, boolean debug){
   userResponse = "";
 
   // device configuration process.
-  while(time > millis() || loop){
+  while (time > millis() || loop) {
 
     sendSMS("What is the address of the installation of s"+ String(device.ID) +"?");
 
-    while(userResponse.equals("") && time > millis())
+    while (userResponse.equals("") && time > millis())
       userResponse = updateSMS(1);
 
     userResponse.trim();
@@ -400,31 +397,25 @@ Sensor ChangeConfig(Sensor device, boolean debug){
 
     sendSMS("Activate TILT SENSOR? y/n");
     userResponse = getYN(time);
-    if(userResponse.equals("NORESPONSE"))
-      break;
+    if (userResponse.equals("NORESPONSE")) break;
 
-    if(userResponse.indexOf("y") == 0)
-      device.tilt = ON;
+    if (userResponse.indexOf("y") == 0) device.tilt = ON;
     sendSMS("OK.");                                                          //THIS "OK" STUFF MIGHT NEED TO CHANGE!
     delay(100);
     
     sendSMS("Activate LIGHT SENSOR? y/n");
     userResponse = getYN(time);
-    if(userResponse.equals("NORESPONSE"))
-      break;
+    if (userResponse.equals("NORESPONSE")) break;
     
-    if(userResponse.equals("y"))
-      device.light = ON;
+    if (userResponse.equals("y")) device.light = ON;
     sendSMS("OK.");
     delay(100);
 
     sendSMS("Activate CONDUCTIVITY SENSOR? y/n");
     userResponse = getYN(time);
-    if(userResponse.equals("NORESPONSE"))
-      break;
+    if (userResponse.equals("NORESPONSE")) break;
 
-    if(userResponse.equals("y"))
-      device.conductivity = ON;
+    if (userResponse.equals("y")) device.conductivity = ON;
     sendSMS("OK.");
     delay(100);
 
@@ -432,23 +423,22 @@ Sensor ChangeConfig(Sensor device, boolean debug){
 
     sendSMS("Would you like to make any changes? y/n");
     userResponse = getYN(time);
-    if(userResponse.equals("NORESPONSE"))
-      break;
+    if (userResponse.equals("NORESPONSE")) break;
 
 
     // configure sensor.
-    if(userResponse.equals("n")){
+    if (userResponse.equals("n")) {
       sendSMS("S"+ String(device.ID) +" Configuration Saved. Pushing configuration, this may take a moment.");
 
       // send parms too sensor.
       loadPayload(device, LoadParms);
-      if(!sendPayload(address)){
+      if (!sendPayload(address)) {
         sendSMS("Failed to load config.");
         return device;  
       }
       delay(5000);
       loadPayload(device, GoToSleep);
-      if(!sendPayload(address)){
+      if (!sendPayload(address)) {
         sendSMS("Failed to load config.");
         return device;  
       }
@@ -458,15 +448,15 @@ Sensor ChangeConfig(Sensor device, boolean debug){
       unsigned long int time2 = millis();
       unsigned int timeout2 = 30000;
       time2 = time2+timeout2;
-      while(!(getPayload(address))){
-        if(millis()>time2){
+      while (!(getPayload(address))) {
+        if (millis()>time2) {
           sendSMS("Radio failed to respond. Configure canceled.");
           return device;
         }
       }
 
       // check for proper reply
-      switch(Message.Mode){
+      switch (Message.Mode) {
         case WaitForCmd:
           break;
         case CommsFail:
@@ -498,7 +488,7 @@ Sensor ChangeConfig(Sensor device, boolean debug){
 
 /*  Pushes the config made by the user and returns 
     message to send to user by SMS.               */
-String CurrConfig(Sensor device){
+String CurrConfig (Sensor device) {
   String message;
   message = ("S"+ String(device.ID) 
             +" CURRENT SENSOR CONFIG:\n----- Config -----\nInstall Address: "+ device.name 
@@ -510,7 +500,7 @@ String CurrConfig(Sensor device){
 }
 
 
-String CurrState(Sensor device){
+String CurrState (Sensor device) {
 
   switch(Message.State){
     case NullState: return "Null State";
@@ -525,34 +515,6 @@ String CurrState(Sensor device){
     case AmSilent:  return "Silent";
     case CantArm: return "Cant Arm";
   }
-}
-
-
-/*  Sets the device to command requesting mode which 
-    just waits for the user to tell the device what state
-    it should go in.
-    SAME CHANGES TO BE MADE                               */
-Sensor ReqCommand(String cmd, Sensor device, boolean debug){
-  String message = "";
-  sendSMS("Type \"silent\" for silent mode or \"sleep\" for sleep mode");
-  
-  while(message == "")
-    message = updateSMS(1);
-
-  if(message.indexOf("silent") == 0 || message.indexOf("Silent") == 0){
-    sendSMS("Device set to SILENT.");                                     // *IMPORTANT* make this actually update state to silent mode
-    device.status = INACTIVE;
-    device.state = GoSilent;
-  }
-
-  if(message.indexOf("sleep") == 0 || message.indexOf("Sleep") == 0){
-    sendSMS("Device set to SLEEP.");
-    device.status = INACTIVE;
-    device.state = GoToSleep;
-  }
-
-  return device;
-
 }
 
 
