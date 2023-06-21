@@ -49,35 +49,35 @@ boolean sendSMS(String message){
 //Reads SMS message comming from phone.
 String readSMS(const int timeout, int slot){
 
-  String response = "";
+  String serial = "";
   String message = "";
   String CMD = "AT+CMGR="+ String(slot);
   int charCount = 0;
 
   delay(100);
-  Serial1.println(CMD);                                                        // prints cmd which prints out message received.
+  Serial1.println(CMD);                                                      // prints cmd which prints out message received.
   delay(100);
 
-  while((Serial1.available())){                                                // looks for AT cmd response message.
+  while((Serial1.available())){                                              // looks for AT cmd response message.
     char c = Serial1.read();                                                    
-    if((c == '\n') && (response.indexOf("+CMGR: \"REC UNREAD\"") >= 0))        // parses out the junk part of message.
+    if((c == '\n') && (serial.indexOf("+CMGR: \"REC UNREAD\"") >= 0))        // parses out the junk part of message.
       break;
 
-    response += c;
+    serial += c;
     delay(1);
   }
 
-  if(DEBUG){SerialUSB.println(response);}                                      // for debugging, prints out junk part of message.
+  if(DEBUG){SerialUSB.println(serial);}                                      // for debugging, prints out junk part of message.
 
-  if(response.indexOf("OK") == -1) {                                           // if no message was received, only "OK" will be read.
+  if(serial.indexOf("OK") == -1) {                                           // if no message was received, only "OK" will be read.
     long int time = millis();
     boolean loop = true;
 
-    while ((time + timeout) > millis() && loop){                               // stores actual message sent by SMS.
+    while ((time + timeout) > millis() && loop){                             // stores actual message sent by SMS.
       while (Serial1.available()){
         char c = Serial1.read();
         if((c == '\n')){
-          loop = false;                                                        // breaks loop once message is read.
+          loop = false;                                                      // breaks loop once message is read.
           break; 
         }
 
@@ -99,28 +99,28 @@ String readSMS(const int timeout, int slot){
 
 
 // Clears all old SMS messages
-void clearSMS(){
+void clearSMS () {
   String CMD = "";
-  String response = "";
+  String serial = "";
 
-  for(int i = 0; i <= 49; i++){                                 // runs through all SMS memory slots (50).
+  for (int i = 0; i <= 49; i++) {                                 // runs through all SMS memory slots (50).
     CMD = "AT+CMGD=" + String(i);    
     sendCMD(CMD, 10, DEBUG);
     //Serial1.println(CMD);    
     delay(1);
     
-    while (Serial1.available()){
+    while (Serial1.available()) {
       char c = Serial1.read();
-      response += c;
+      serial += c;
     }//while
 
-    if(response.indexOf("ERROR") != -1){                        // checks for errors in +CMGD cmd
+    if (serial.indexOf("ERROR") != -1) {                        // checks for errors in +CMGD cmd
       SerialUSB.println("Failed to clear messages");
       return;
     }//if
     
-    if (DEBUG){                                                 // prints out AT cmd responses. for debugging.
-      while(Serial1.available()){
+    if (DEBUG) {                                                 // prints out AT cmd responses. for debugging.
+      while (Serial1.available()) { 
         SerialUSB.write(Serial1.read());
         delay(1);
       }
@@ -177,7 +177,7 @@ String updateSMS (int mode) {
 
 //Sends command too SIM7600 Serial
 String sendCMD (String cmd, const int timeout, boolean debug) {
-    String response = "";
+    String serial = "";
     Serial1.flush();
 
     Serial1.println(cmd);                                           // prints command to SIM7600 Serial.
@@ -186,20 +186,19 @@ String sendCMD (String cmd, const int timeout, boolean debug) {
     while ((time + timeout) > millis()){                            // reads any error or OK responses spat out from the SIM7600 Serial.
       while (Serial1.available()){
         char c = Serial1.read();
-        response += c;
+        serial += c;
       }//while
     }//while
 
-    if (debug) SerialUSB.print(response);                           // prints response to command. for debugging.
+    if (debug) SerialUSB.print(serial);                           // prints response to command. for debugging.
 
-    return response;                                                // returns SIM7600 response for debugging. will change too true false maybe.
+    return serial;                                                // returns SIM7600 response for debugging. will change too true false maybe.
 }
 
 
 
 //Looks through SMS message for certain key words.
 boolean checkSMS(String message, int slot, boolean debug) {
-  String newMessage;
   int ID;
   message.toLowerCase();                                               // message put too lower case for better user experience.
   
