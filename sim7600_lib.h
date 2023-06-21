@@ -64,7 +64,7 @@ String CurrState(Sensor device);
 Sensor ReqCommand(String cmd, Sensor device);
 Sensor AlarmOn(Sensor device);
 Sensor Disarm(Sensor device);
-Sensor ChangeConfig(Sensor device, boolean debug);
+Sensor ChangeConfig(Sensor device);
 Sensor storeStatus(Sensor device);
 boolean checkSMS(String message, int slot, boolean debug);
 boolean sendSMS(String message);
@@ -73,10 +73,8 @@ void clearSMS();
 void Status(Sensor device);
 void Help(boolean debug);
 void Alarm(Sensor device);
-void Example(String message, boolean debug);
 void setDeviceID();
 void setDeviceAddress();
-// boolean getReadyInstall(Sensor device, boolean debug);
 
 
 #endif /* SIM7600_LIB_H */

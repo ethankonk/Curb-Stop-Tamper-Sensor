@@ -3,9 +3,7 @@
 #include "NRTF_lib.h"
 
 
-/*Sends SMS message too phone*/
-// parameters: 
-//  - message, message you want to send.
+//Sends SMS message to phone.
 boolean sendSMS(String message){
   unsigned int timeout = 10000;
   unsigned long int time = millis();
@@ -16,7 +14,7 @@ boolean sendSMS(String message){
   delay(100);
 
   Serial1.print(message);                                                   // print message to send to SIM7600 Serial
-  delay(500);
+  delay(100);
   Serial1.write(26);                                                        // ASCII code for Ctrl-Z
 
   String serial = "";
@@ -240,13 +238,13 @@ boolean checkSMS(String message, int slot, boolean debug) {
     
     if (message.indexOf("status") == 0) {                                  // checks for "status" cmd. 
       if(debug) SerialUSB.println("SENDING STATUS");
-      Status(device[ID-1], DEBUG);                                       // calls Status() which returns a devices' status.
+      Status(device[ID-1]);                                       // calls Status() which returns a devices' status.
       return true;
     }//if
 
     else if (message.indexOf("configure") == 0) {                          // checks for "configure" cmd.
       if(debug) SerialUSB.println("SENDING CODE 1");
-      device[ID-1] = ChangeConfig(device[ID-1], DEBUG);                  // calls 
+      device[ID-1] = ChangeConfig(device[ID-1]);                  // calls 
       return true;
     }      
       
@@ -519,31 +517,37 @@ String CurrState (Sensor device) {
 
 
 
-/*  Sets the device to ALARMING mode.
-    SAME CHANGES TO BE MADE                               */
-Sensor AlarmOn(Sensor device){
+// Arms sensor module.
+Sensor AlarmOn (Sensor device) {
   String message;
 
-  if(!device.configured){
+  // check if device is not configured.
+  if (!device.configured) {
     sendSMS("S"+ String(device.ID) +" has not been configured yet. Arming canceled.");
     return device;
   }
+
+  // beginning arming process.
   sendSMS("Arming s"+ String(device.ID) +". This may take a few moments.");
   device.status = ACTIVE;
   device.state = Armed;
 
-  delay(100);
+  // send command to arm.
   loadPayload(device, GoToArm);
-  if(!sendPayload(address)){
+  if (!sendPayload(address)) {
     sendSMS("Failed to arm.");
     return device;
   }
   delay(5000);
-  if(!getPayload(address)){ sendSMS("Failed to reach module."); return device;}
 
-  if(Message.State == CantArm){ 
-    sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
-    return device;
+  // look for sensor response.
+  if (!getPayload(address)) {sendSMS("Failed to reach module."); return device;}
+
+  // check response.
+  switch (Message.State) {
+    case CantArm: 
+      sendSMS("Failed to activate sensors. Make sure sensors are not activated while arming.");
+      return device;
   }
 
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
@@ -553,11 +557,12 @@ Sensor AlarmOn(Sensor device){
 
 
 
-Sensor Disarm(Sensor device){
+// Disarms sensor module.
+Sensor Disarm (Sensor device) {
   long int timeout = 600000;
   String message;
 
-  if(!device.configured){ 
+  if (!device.configured) { 
     sendSMS("S"+ String(device.ID) +" has not been configured yet. Disarm canceled.");
     return device;
   }
@@ -569,18 +574,18 @@ Sensor Disarm(Sensor device){
 
   unsigned long long int time = millis();
   time = time + timeout;
-  while(time > millis()){       //MAKE THIS TIMEOUT
+  while (time > millis()) {
     message = getYN(time);
 
-    if(message.equals("y")){
+    if (message.equals("y")) {
       device.status = INACTIVE;
       loadPayload(device, GoToSleep);
-      if(!(sendPayload(address))){
+      if (!(sendPayload(address))) {
         sendSMS("Failed to communicate with the device. Disarm canceled.");
         return device;
       }
-      while(!(getPayload(address)));
-      switch(Message.State){
+      while (!(getPayload(address)));
+      switch (Message.State) {
         case Asleep:
           break;
         case CommsFail:
@@ -593,33 +598,33 @@ Sensor Disarm(Sensor device){
       break;
     }
 
-    else if(message.equals("n")){
+    else if (message.equals("n")) {
       sendSMS("Disarm canceled");
       break;
     }
 
-    else if(message.equals("NORESPONSE")){
+    else if (message.equals("NORESPONSE")) {
       sendSMS("Process timed out. Disarm canceled.");
       break;
     }
   }
-  if(DEBUG){SerialUSB.println("DISARMING COMPLETE");} 
+  if(DEBUG) SerialUSB.println("DISARMING COMPLETE");
   return device;
 }
 
 
 
 /*Gives all devices an ID*/ 
-void setDeviceID(){
-  for(int i = 0; i <= 3; i++){
+void setDeviceID () {
+  for (int i = 0; i <= 3; i++) {
     device[i].ID = i+1;
-    if (DEBUG){SerialUSB.println("Device "+ String(i) +" ID: "+ String(device[i].ID));}
+    if (DEBUG) SerialUSB.println("Device "+ String(i) +" ID: "+ String(device[i].ID));
   }
 }
 
 
 
-String getDateTime(){
+String getDateTime () {
   String date = "";
   int timeout = 1000;
   int count;
@@ -627,7 +632,7 @@ String getDateTime(){
   date = sendCMD("AT+CCLK?", 1000, DEBUG);
   delay(100);
 
-  if(date.indexOf("ERROR") != -1){
+  if (date.indexOf("ERROR") != -1) {
     SerialUSB.println("ERROR GETTING DATE!");
     return "";
   }
@@ -638,14 +643,14 @@ String getDateTime(){
   date.remove(last-3, 20);
   date.trim();
 
-  if (DEBUG){SerialUSB.println(date);}
+  if (DEBUG) SerialUSB.println(date);
 
   return date;
 }
 
 
 
-int getID(String message, boolean debug){
+int getID (String message, boolean debug) {
   int ID;
 
   message.remove(0,1);
@@ -653,33 +658,29 @@ int getID(String message, boolean debug){
   SerialUSB.println("ID: "+ message);
   ID = message.toInt();
 
-  if(1 <= ID && ID <= 4){
-    return ID;
-  }
+  if (1 <= ID && ID <= 4) return ID;
+
   sendSMS("s"+ String(ID) +" is not a device!");
   return -1;
 }
 
 
 
-String getYN(int time){
+String getYN (int time) {
   int x = 1;
   String response = "";
 
-  while(time > millis()){
+  while (time > millis()) {
     response = updateSMS(1);
     response.toLowerCase();
 
-    if(response.equals(""))
-      continue;
+    if (response.equals("")) continue;
 
-    else if(response.indexOf("y") == 0)
-      return "y";
+    else if (response.indexOf("y") == 0) return "y";
 
-    else if(response.indexOf("n") == 0)
-      return "n";
+    else if (response.indexOf("n") == 0) return "n";
 
-    else{
+    else {
       sendSMS("That is not an option. Please type either \"y\" or \"n\"");
       Serial1.flush();
     }
@@ -691,7 +692,7 @@ String getYN(int time){
 
 
 
-void Help(boolean debug){
+void Help (boolean debug) {
   sendSMS("----- Help List -----");  
   sendSMS("Command Type: status\n USAGE EXAMPLE: s# status");
   sendSMS("Command Type: configure\n USAGE EXAMPLE: s# configure");
@@ -702,14 +703,14 @@ void Help(boolean debug){
 
 
 
-void Alarm(Sensor device){
+void Alarm (Sensor device) {
   int count = 1800000;                                        // starts at 10 min so that the first alert goes through.
   int loops = 0;                                              // 3 alerts go out, counts the amount of loops Alarm goes through.
   
 
-  while(!(acknowledge) && loops < 3){
+  while (!(acknowledge) && loops < 3) {
     count++;
-    if(updateSMS(1) != ""){
+    if (updateSMS(1) != "") {
       SerialUSB.println("Acknowledgement Received");
       sendSMS("ALERT ACKNOWLEDGED.");
       acknowledge = true;
@@ -718,7 +719,7 @@ void Alarm(Sensor device){
       return;
     }
 
-    if(count >= 1800000){
+    if (count >= 1800000) {
       sendSMS("<<ALERT>>\nDevice ID: "+ String(device.ID) + " has been tampered with!");
       sendSMS("Install Address: "+ device.name 
              +"\nSensors Triggered:\n"
@@ -738,7 +739,7 @@ void Alarm(Sensor device){
 
 
 
-Sensor storeStatus(Sensor device){
+Sensor storeStatus (Sensor device) {
   device.datetime = getDateTime();
   device.state = Message.State;
   device.BatLevel = Message.BatLevel;
@@ -750,14 +751,14 @@ Sensor storeStatus(Sensor device){
 
 
 
-void setDeviceAddress(){
+void setDeviceAddress () {
   int ID;
 
-  for(int i = 0; i <= 3; i++){
+  for (int i = 0; i <= 3; i++) {
     ID = i+1;
     char c = ID + '0';
     // device.address[6] = {'0','0','0','0', c};
     //strcpy(device[i].address, new_address);
-    if(DEBUG){ SerialUSB.println("Device "+ String(ID) +" address: "+ String(device[i].address));}
+    if (DEBUG) SerialUSB.println("Device "+ String(ID) +" address: "+ String(device[i].address));
   }
 }

@@ -144,6 +144,6 @@ boolean pingRF(const byte address[]){
 
   time_spent = millis() - time;
   sendSMS("Device Online. Ping succesful. Time spent: "+ String(time_spent) +" ms.");
-  Status(device[0], DEBUG);
+  Status(device[0]);
   return true;
 }
