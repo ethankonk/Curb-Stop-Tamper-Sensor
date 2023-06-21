@@ -10,19 +10,19 @@ boolean sendSMS(String message){
   timeout = time + timeout;
   String cmd = "AT+CMGS=\"" + phoneNum + "\"";
 
-  sendCMD(cmd, 1000, DEBUG);                                                // sends " AT+CMGS= "+12269357857" " (Will have to make function to change phone#)
+  sendCMD(cmd, 1000, DEBUG);                                                  // sends " AT+CMGS= "+12269357857" "
   delay(100);
 
-  Serial1.print(message);                                                   // print message to send to SIM7600 Serial
+  Serial1.print(message);                                                     // print message to send to SIM7600 Serial.
   delay(100);
-  Serial1.write(26);                                                        // ASCII code for Ctrl-Z
+  Serial1.write(26);                                                          // ASCII code for Ctrl-Z.
 
   String serial = "";
-  while((serial.indexOf("+CMGS: ") < 0) && (serial.indexOf("ERROR") < 0)){  // loops until the message is confirm sent.
+  while ((serial.indexOf("+CMGS: ") < 0) && (serial.indexOf("ERROR") < 0)) {  // loops until the message is confirm sent.
     if(Serial1.available()) 
       serial += char(Serial1.read());
     delay(1);
-    if(timeout < millis()){                                                  
+    if(timeout < millis()){                                                   // timeout when cell service is bad.                      
       SerialUSB.print("\nVERY POOR CONNECTION!");
       POOR_CONNECTION = true;
       timeout += 10000;
@@ -32,11 +32,11 @@ boolean sendSMS(String message){
   if(DEBUG){SerialUSB.println(serial);}
 
   String response = "";
-  while(Serial1.available() && response.indexOf("OK") < 0)                  // look for OK response.
+  while(Serial1.available() && response.indexOf("OK") < 0)                    // look for OK response.
     response += char(Serial1.read());
 
 
-  if(serial.indexOf("ERROR") != -1 || response.indexOf("ERROR") != -1){
+  if(serial.indexOf("ERROR") != -1 || response.indexOf("ERROR") != -1){       // error catch if message fails to send.
     if(DEBUG){SerialUSB.println(response);}
     SerialUSB.println("Failed to send message.");
     return false;
@@ -48,11 +48,7 @@ boolean sendSMS(String message){
 
 
 
-/*Reads SMS message comming from phone. NEEDS TO BE USED IN UpdateSMS()*/
-// parameters:
-//  - timeout, time the loop will wait before throwing up an error.
-//  - slot, message slot number. IMPORTANT FOR READING THE CORRECT MESSAGE.
-//  - debug, just to see whether to throw up the debug stuff.
+//Reads SMS message comming from phone.
 String readSMS(const int timeout, int slot){
 
   String response = "";
@@ -64,7 +60,7 @@ String readSMS(const int timeout, int slot){
   Serial1.println(CMD);                                                        // prints cmd which prints out message received.
   delay(100);
 
-  while((Serial1.available())){                                                // finds first part of received message and reads it out.
+  while((Serial1.available())){                                                // looks for AT cmd response message.
     char c = Serial1.read();                                                    
     if((c == '\n') && (response.indexOf("+CMGR: \"REC UNREAD\"") >= 0))        // parses out the junk part of message.
       break;
@@ -82,22 +78,21 @@ String readSMS(const int timeout, int slot){
     while ((time + timeout) > millis() && loop){                               // stores actual message sent by SMS.
       while (Serial1.available()){
         char c = Serial1.read();
-        if((c == '\n')){                                                       // only reads message up to the newline.
+        if((c == '\n')){
           loop = false;                                                        // breaks loop once message is read.
           break; 
         }
 
         message += c;
         delay(1);
-      }//while
-    }//while
+      }
+    }
     if(DEBUG){SerialUSB.println("New unread message: "+ message);}             // prints out message 
-    
     return message; 
+  }
 
-  }//if
   else
-    if(DEBUG){SerialUSB.println("No unread messages");}
+    if (DEBUG) SerialUSB.println("No unread messages");
 
   clearSMS();
   return "";
@@ -105,14 +100,12 @@ String readSMS(const int timeout, int slot){
 
 
 
-/*Clears all old SMS messages*/
-// parameters:
-//  - debug, debugging purposes
+// Clears all old SMS messages
 void clearSMS(){
   String CMD = "";
   String response = "";
 
-  for(int i = 0; i <= 49; i++){                                 // clears all 50 stored messages.
+  for(int i = 0; i <= 49; i++){                                 // runs through all SMS memory slots (50).
     CMD = "AT+CMGD=" + String(i);    
     sendCMD(CMD, 10, DEBUG);
     //Serial1.println(CMD);    
@@ -128,59 +121,54 @@ void clearSMS(){
       return;
     }//if
     
-    if (DEBUG){                                                 // for debugging
+    if (DEBUG){                                                 // prints out AT cmd responses. for debugging.
       while(Serial1.available()){
         SerialUSB.write(Serial1.read());
         delay(1);
-      }//while
-    }//if
-  }//for
-}//function
+      }
+    }
+  }
+}
 
 
 
-/*Checks for any new SMS messages. Looks for new message prompt. Needs to be put in a loop.*/
-// parameters:
-//  - mode, dictates what kind of return the function will send.
-//     mode = 0: Calls the checkSMS function.
-//     mode = 1: Returns the readSMS message.
-//  - debug, debugging stuff
-String updateSMS(int mode){
+//Checks for any new SMS messages. Looks for new message prompt. Needs to be put in a loop.
+String updateSMS (int mode) {
   char* bufPtr = buffer;
   String message;
   
-  if(Serial1.available()){
+  if (Serial1.available()) {
     int slot = 0;
 
-    do {                                                            // reads SIM7600 Serial.
+    do {                                                           // reads SIM7600 Serial.
       *bufPtr = Serial1.read(); 
       
       if(DEBUG){SerialUSB.write(*bufPtr);} 
       delay(1);
-    } while((*bufPtr++ != '\n') && (Serial1.available()));         // reads until a new line or until there is nothing left to read.
+    } while((*bufPtr++ != '\n') && (Serial1.available()));         
 
     *bufPtr = 0;
-    if (1 == (sscanf(buffer, "+CMTI: \"SM\",%d", &slot))){         // looks for new message prompt.
-      
-      if(DEBUG){
+    if (1 == (sscanf(buffer, "+CMTI: \"SM\",%d", &slot))){         // looks for new message prompt. slot number is parsed from the message.
+
+      if (DEBUG) {
         SerialUSB.print("slot: ");
         SerialUSB.println(slot);
       }
 
-      message = readSMS(1000, slot);                               // if found, calls readSMS and stores messsage in message variable.
+      message = readSMS(1000, slot);                               // read message at the slot number found.
 
-      if(mode == 0){                                               // checks the message for command.
-        if(!checkSMS(message, slot,DEBUG))                         // WILL CHANGE ONCE PROTOTYPE IS DONE
-          if(DEBUG){SerialUSB.println("NOT 0, 1, 2, 3");}
+      if (mode == 0) {                                             // checks the message for key words.
+        if (!checkSMS(message, slot, DEBUG))                         
+          if (DEBUG) SerialUSB.println("NOT A VALID COMMAND");
       }//if
 
-      else if(mode == 1){                                          // simply returns the message received.
+      else if(mode == 1){                                          // second mode which only returns the message.
         return message;
       }//else if
     }//if
 
     /*DEBBUGGING*/
-    if(DEBUG){SerialUSB.write(bufPtr);}
+    if(DEBUG) SerialUSB.write(bufPtr);                             // prints the message (i think).
     
   }//if
   Serial1.flush();                                                 
@@ -189,12 +177,8 @@ String updateSMS(int mode){
 
 
 
-/*Sends command too SIM7600 Serial*/
-// parameters: 
-//  - cmd, command you would like to send.
-//  - timeout, time before loop gives up sending the command.
-//  - debug, debugging stuff.
-String sendCMD(String cmd, const int timeout, boolean debug){
+//Sends command too SIM7600 Serial
+String sendCMD (String cmd, const int timeout, boolean debug) {
     String response = "";
     Serial1.flush();
 
@@ -208,116 +192,125 @@ String sendCMD(String cmd, const int timeout, boolean debug){
       }//while
     }//while
 
-    /*DEBBUGGING*/
-    if (debug){
-        SerialUSB.print(response);
-    }
+    if (debug) SerialUSB.print(response);                           // prints response to command. for debugging.
 
-    return response;                                                // returns SIM7600 response for debugging.
+    return response;                                                // returns SIM7600 response for debugging. will change too true false maybe.
 }
 
 
 
-/*Looks through SMS message for certain prompts. WILL NEED TO MODIFY*/
-// parameters: 
-//  - message, message parsed from the user's SMS.
-//  - slot, message slot.
-//  - debug, debugging stuff.
+//Looks through SMS message for certain key words.
 boolean checkSMS(String message, int slot, boolean debug) {
   String newMessage;
   int ID;
-  message.toLowerCase();
+  message.toLowerCase();                                               // message put too lower case for better user experience.
   
-  if (message.indexOf("s") == 0) {
+  // gets sensor ID from user input.
+  if (message.indexOf("s") == 0) {                                     
     ID = getID(message, debug);
     if(ID == -1)
       return false;
     
-    message.remove(0,3);
+    // parse out ID from the message
+    message.remove(0,3);                                               
     SerialUSB.println("CMD Type: "+ message);
     
-    if (message.indexOf("status") == 0) {                                  // checks for "status" cmd. 
+    // checks for "status" cmd. 
+    if (message.indexOf("status") == 0) {                              
       if(debug) SerialUSB.println("SENDING STATUS");
-      Status(device[ID-1]);                                       // calls Status() which returns a devices' status.
-      return true;
-    }//if
-
-    else if (message.indexOf("configure") == 0) {                          // checks for "configure" cmd.
-      if(debug) SerialUSB.println("SENDING CODE 1");
-      device[ID-1] = ChangeConfig(device[ID-1]);                  // calls 
-      return true;
-    }      
-      
-    else if (message.indexOf("disarm") == 0) {                             // checks for "2".
-      if(debug) SerialUSB.println("SENDING CODE 2");
-      device[ID-1] = Disarm(device[ID-1]);
+      Status(device[ID-1]);                                            // gets device status.
       return true;
     }
 
-    else if (message.indexOf("arm") == 0) {                                // checks for "alarming"
-      if(debug){SerialUSB.println("SENDING CODE 3");}
-      device[ID-1] = AlarmOn(device[ID-1]);
+    // checks for "configure" cmd.
+    else if (message.indexOf("configure") == 0) {                      
+      if(debug) SerialUSB.println("SENDING CONFIGURE");
+      device[ID-1] = ChangeConfig(device[ID-1]);                       // runs through the change config process.
+      return true;
+    }      
+    
+    // checks for "disarm" cmd.
+    else if (message.indexOf("disarm") == 0) {                         
+      if(debug) SerialUSB.println("SENDING DISARM");
+      device[ID-1] = Disarm(device[ID-1]);                             // runs through device disarming process.
+      return true;
+    }
+
+    // checks for "arm" cmd.
+    else if (message.indexOf("arm") == 0) {                            
+      if(debug){SerialUSB.println("SENDING ARM");}
+      device[ID-1] = AlarmOn(device[ID-1]);                            // runs through arming process.
       return true;
     }
     
-    else if (message.indexOf("ping") == 0) {
+    // checks for "ping" cmd.
+    else if (message.indexOf("ping") == 0) {                           
       if (!(device[ID-1].configured)) {
         sendSMS("S"+ String(device[ID-1].ID) +" has not been configured yet. Ping canceled.");
         return false;
       }
-
-      if (DEBUG) SerialUSB.println("SENDING CODE 4");
+      
+      if (DEBUG) SerialUSB.println("SENDING PING");                 
       sendSMS("Pinging...");
       SerialUSB.println((pingRF(address) ? "Ping Success" : "Ping Failed"));
       return true;
     }
+
+    // catch for unknown cmd.
     else {
       sendSMS("ERROR: Unknown command.\nPlease type \"help\" for list of valid commands.");
       return false;
     }
-  }// if(message.indexOf("s") == 0)
+  }
 
-  else if (message.indexOf("help") == 0) {
+  // NON DEVICE RELATED COMMANDS
+
+  // checks for "help" cmd.  
+  else if (message.indexOf("help") == 0) {                                            
     Help(debug);
-  }// else if
-
-  else if (message.indexOf("changenum") == 0) {
+    return true;
+  }
+  
+  // checks for "changenum" cmd.
+  else if (message.indexOf("changenum") == 0) {                       
     String new_phone_number = message;
+    
+    // get and store new phonenumber.
     int first = new_phone_number.indexOf("\"");
     first++;
     new_phone_number.remove(0, first);
     int last = new_phone_number.indexOf("\"");
     last;
     new_phone_number.remove(last, 20);
-
     if (DEBUG) SerialUSB.println("New phone number: "+ new_phone_number);
 
     sendSMS("Are you sure you would like to change the phone number too: "+ new_phone_number);
 
+    // user has 10 minutes to respond before process times out.
     String response = getYN(600000);
     if (response.equals("NORESPONSE")) {sendSMS("Process timed out. Changenum canceled."); return false;}
 
-
+    // user response check.
     if (response.equals("y")) {
       sendSMS("Phone number changed.");
       phoneNum = new_phone_number;
       SerialUSB.println(phoneNum);
       Help(debug);
       return true;
+    } 
+    else if (response.equals("n")) { 
+      sendSMS("Changenum canceled."); return true;
     }
-    else if (response.equals("n")) { sendSMS("Changenum canceled."); return true;}
   }
 
-
-  else {                                                             // if message none of the above, function returns false which signals
-    /*DEBUGGING*/                                                   // that nothing of value was received. WILL CHANGE TO DELETE MESSAGES (MAYBE).
+  // non command message catch.
+  else {
     if(debug) SerialUSB.println("NOT AN OPTION");
-
 
     message.trim();
     sendSMS("\""+ message +"\" is not a known command. Please type \"help\" for a list of commands.");    
     return false;
-  }// else
+  }
 }
 
 
