@@ -73,7 +73,7 @@ Sensor ChangeConfig(Sensor device);
 Sensor storeStatus(Sensor device);
 boolean checkSMS(String message, int slot, boolean debug);
 boolean sendSMS(String message);
-int getID(String message, boolean debug);
+int getID(String message);
 int getYN(unsigned long int time);
 void clearSMS();
 void Status(Sensor device);

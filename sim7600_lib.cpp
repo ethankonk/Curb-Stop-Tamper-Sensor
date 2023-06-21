@@ -5,9 +5,8 @@
 
 //Sends SMS message to phone.
 boolean sendSMS(String message){
-  unsigned int timeout = 10000;
   unsigned long int time = millis();
-  timeout = time + timeout;
+  unsigned long int timeout = time + 10000;
   String cmd = "AT+CMGS=\"" + phoneNum + "\"";
 
   sendCMD(cmd, 1000, DEBUG);                                                  // sends " AT+CMGS= "+12269357857" "
@@ -31,13 +30,12 @@ boolean sendSMS(String message){
 
   if(DEBUG){SerialUSB.println(serial);}
 
-  String response = "";
-  while(Serial1.available() && response.indexOf("OK") < 0)                    // look for OK response.
-    response += char(Serial1.read());
+  while(Serial1.available() && serial.indexOf("OK") < 0)                      // look for OK response.
+    serial += char(Serial1.read());
 
 
-  if(serial.indexOf("ERROR") != -1 || response.indexOf("ERROR") != -1){       // error catch if message fails to send.
-    if(DEBUG){SerialUSB.println(response);}
+  if(serial.indexOf("ERROR") != -1){                                          // error catch if message fails to send.
+    if(DEBUG){SerialUSB.println(serial);}
     SerialUSB.println("Failed to send message.");
     return false;
     }
@@ -207,7 +205,7 @@ boolean checkSMS(String message, int slot, boolean debug) {
   
   // gets sensor ID from user input.
   if (message.indexOf("s") == 0) {                                     
-    ID = getID(message, debug);
+    ID = getID(message);
     if(ID == -1)
       return false;
     
@@ -549,7 +547,6 @@ Sensor AlarmOn (Sensor device) {
 // Disarms sensor module.
 Sensor Disarm (Sensor device) {
   long int timeout = 600000;
-  String message;
 
   if (!device.configured) { 
     sendSMS("S"+ String(device.ID) +" has not been configured yet. Disarm canceled.");
@@ -615,8 +612,6 @@ void setDeviceID () {
 
 String getDateTime () {
   String date = "";
-  int timeout = 1000;
-  int count;
 
   date = sendCMD("AT+CCLK?", 1000, DEBUG);
   delay(100);
@@ -639,7 +634,7 @@ String getDateTime () {
 
 
 
-int getID (String message, boolean debug) {
+int getID (String message) {
   int ID;
 
   message.remove(0,1);
@@ -656,17 +651,17 @@ int getID (String message, boolean debug) {
 
 
 int getYN (unsigned long int time) {
-  String response = "";
+  String userResponse = "";
 
   while (time > millis()) {
-    response = updateSMS(1);
-    response.toLowerCase();
+    userResponse = updateSMS(1);
+    userResponse.toLowerCase();
 
-    if (response.equals("")) continue;
+    if (userResponse.equals("")) continue;
 
-    else if (response.indexOf("y") == 0) return YES;
+    else if (userResponse.indexOf("y") == 0) return YES;
 
-    else if (response.indexOf("n") == 0) return NO;
+    else if (userResponse.indexOf("n") == 0) return NO;
 
     else {
       sendSMS("That is not an option. Please type either \"y\" or \"n\"");
@@ -720,9 +715,9 @@ void Alarm (Sensor device) {
       sendSMS("To stop alerts please type \"OK\"");
       count = 0;
       loops++;
-    }//if
+    }
   delay(1);
-  }//while
+  }
 }
 
 
