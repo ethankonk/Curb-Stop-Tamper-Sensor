@@ -16,8 +16,9 @@ boolean sendSMS(String message){
   delay(100);
   Serial1.write(26);                                                          // ASCII code for Ctrl-Z.
 
+  // loops until the message is confirm sent.
   String serial = "";
-  while ((serial.indexOf("+CMGS: ") < 0) && (serial.indexOf("ERROR") < 0)) {  // loops until the message is confirm sent.
+  while ((serial.indexOf("+CMGS: ") < 0) && (serial.indexOf("ERROR") < 0)) {  
     if(Serial1.available()) 
       serial += char(Serial1.read());
     delay(1);
@@ -27,14 +28,14 @@ boolean sendSMS(String message){
       timeout += 10000;
     }
   }
-
   if(DEBUG){SerialUSB.println(serial);}
 
-  while(Serial1.available() && serial.indexOf("OK") < 0)                      // look for OK response.
+  // look for OK response.
+  while(Serial1.available() && serial.indexOf("OK") < 0)                      
     serial += char(Serial1.read());
 
-
-  if(serial.indexOf("ERROR") != -1){                                          // error catch if message fails to send.
+  // error catch if message fails to send.
+  if(serial.indexOf("ERROR") != -1){                                          
     if(DEBUG){SerialUSB.println(serial);}
     SerialUSB.println("Failed to send message.");
     return false;
@@ -58,7 +59,8 @@ String readSMS(const int timeout, int slot){
   Serial1.println(CMD);                                                      // prints cmd which prints out message received.
   delay(100);
 
-  while((Serial1.available())){                                              // looks for AT cmd response message.
+  // reads AT cmd response message.
+  while((Serial1.available())){                                              
     char c = Serial1.read();                                                    
     if((c == '\n') && (serial.indexOf("+CMGR: \"REC UNREAD\"") >= 0))        // parses out the junk part of message.
       break;
@@ -69,11 +71,12 @@ String readSMS(const int timeout, int slot){
 
   if(DEBUG){SerialUSB.println(serial);}                                      // for debugging, prints out junk part of message.
 
-  if(serial.indexOf("OK") == -1) {                                           // if no message was received, only "OK" will be read.
+  if(serial.indexOf("OK") == -1) {                                           
     long int time = millis();
     boolean loop = true;
 
-    while ((time + timeout) > millis() && loop){                             // stores actual message sent by SMS.
+    // stores actual message sent by SMS.
+    while ((time + timeout) > millis() && loop){                             
       while (Serial1.available()){
         char c = Serial1.read();
         if((c == '\n')){
@@ -103,7 +106,8 @@ void clearSMS () {
   String CMD = "";
   String serial = "";
 
-  for (int i = 0; i <= 49; i++) {                                 // runs through all SMS memory slots (50).
+  // runs through all SMS memory slots (50).
+  for (int i = 0; i <= 49; i++) {                                 
     CMD = "AT+CMGD=" + String(i);    
     sendCMD(CMD, 10, DEBUG);
     //Serial1.println(CMD);    
@@ -119,7 +123,7 @@ void clearSMS () {
       return;
     }//if
     
-    if (DEBUG) {                                                 // prints out AT cmd responses. for debugging.
+    if (DEBUG) {                                                // prints out AT cmd responses. for debugging.
       while (Serial1.available()) { 
         SerialUSB.write(Serial1.read());
         delay(1);
@@ -152,23 +156,22 @@ String updateSMS (int mode) {
         SerialUSB.print("slot: ");
         SerialUSB.println(slot);
       }
-
       message = readSMS(1000, slot);                               // read message at the slot number found.
 
-      if (mode == 0) {                                             // checks the message for key words.
+      // first mode which checks the message for key words.
+      if (mode == 0) {                                             
         if (!checkSMS(message, slot, DEBUG))                         
           if (DEBUG) SerialUSB.println("NOT A VALID COMMAND");
-      }//if
+      }
 
-      else if(mode == 1){                                          // second mode which only returns the message.
+      // second mode which only returns the message.
+      else if(mode == 1){                                          
         return message;
-      }//else if
-    }//if
+      }
+    }
 
-    /*DEBBUGGING*/
-    if(DEBUG) SerialUSB.write(bufPtr);                             // prints the message (i think).
-    
-  }//if
+    if(DEBUG) SerialUSB.write(bufPtr);                             // prints the message (i think). for debugging.  
+  }
   Serial1.flush();                                                 
   return "";                                                       // return nothing if new message notif not found.
 }
@@ -180,10 +183,10 @@ String sendCMD (String cmd, const int timeout, boolean debug) {
     String serial = "";
     Serial1.flush();
 
-    Serial1.println(cmd);                                           // prints command to SIM7600 Serial.
+    Serial1.println(cmd);                                         // prints command to SIM7600 Serial.
 
     long int time = millis();
-    while ((time + timeout) > millis()){                            // reads any error or OK responses spat out from the SIM7600 Serial.
+    while ((time + timeout) > millis()){                          // reads any error or OK responses spat out from the SIM7600 Serial.
       while (Serial1.available()){
         char c = Serial1.read();
         serial += c;
@@ -311,14 +314,13 @@ boolean checkSMS(String message, int slot, boolean debug) {
 
 
 
-/*  Gets the status of specified device. 
-    NEED TO PRINT MORE STATUS STUFF. **CHANGE THIS LATER**
-*/
+//Gets the status of specified device. 
 void Status (Sensor device) {
   String message;
   String config = CurrConfig(device);
   String state = CurrState(device);
 
+  // create and send status message.
   message = ("----- Status -----\nDevice ID: "+ String(device.ID) 
             +"\nName: "+ device.name 
             +"\nStatus: "+ (device.status ? "ACTIVE" : "INACTIVE")
@@ -328,21 +330,20 @@ void Status (Sensor device) {
   sendSMS(message);
   SerialUSB.println(message);
   
+  // create and send config message.
   message = CurrConfig(device);
   sendSMS(message);
-
   SerialUSB.println(message);
 }
 
 
 
-/**/
+// Process for changing the config for individual devices.
 Sensor ChangeConfig (Sensor device) {
   String userResponse = "";
   const int timeout = 600000;
   long int time = millis();
   int loop = 1;
-
   time = time + timeout;
 
   // process for device that is already configured
@@ -372,22 +373,23 @@ Sensor ChangeConfig (Sensor device) {
   // device configuration process.
   while (time > millis() || loop) {
 
+    // get user response for device name.
     sendSMS("What is the address of the installation of s"+ String(device.ID) +"?");
-
     while (userResponse.equals("") && time > millis())
       userResponse = updateSMS(1);
-
     userResponse.trim();
     device.name = userResponse;
 
+    // toggle tilt sensor.
     sendSMS("Activate TILT SENSOR? y/n");
     reply = getYN(time);
     if (reply == NOREPLY) break;
 
     if (reply == YES) device.tilt = ON;
-    sendSMS("OK.");                                                          //THIS "OK" STUFF MIGHT NEED TO CHANGE!
+    sendSMS("OK.");                                                          
     delay(100);
     
+    // toggle light sensor;
     sendSMS("Activate LIGHT SENSOR? y/n");
     reply = getYN(time);
     if (reply == NOREPLY) break;
@@ -396,6 +398,7 @@ Sensor ChangeConfig (Sensor device) {
     sendSMS("OK.");
     delay(100);
 
+    // toggle conductivity sensor.
     sendSMS("Activate CONDUCTIVITY SENSOR? y/n");
     reply = getYN(time);
     if (reply == NOREPLY) break;
@@ -404,8 +407,8 @@ Sensor ChangeConfig (Sensor device) {
     sendSMS("OK.");
     delay(100);
 
+    // user confirmation for config.
     sendSMS(CurrConfig(device));
-
     sendSMS("Would you like to make any changes? y/n");
     reply = getYN(time);
     if (reply == NOREPLY) break;
@@ -415,13 +418,15 @@ Sensor ChangeConfig (Sensor device) {
     if (reply == NO) {
       sendSMS("S"+ String(device.ID) +" Configuration Saved. Pushing configuration, this may take a moment.");
 
-      // send parms too sensor.
+      // push config too the device.
       loadPayload(device, LoadParms);
       if (!sendPayload(address)) {
         sendSMS("Failed to load config.");
         return device;  
       }
       delay(5000);
+      
+      // put device to sleep.
       loadPayload(device, GoToSleep);
       if (!sendPayload(address)) {
         sendSMS("Failed to load config.");
@@ -461,20 +466,24 @@ Sensor ChangeConfig (Sensor device) {
       return device;
     }
 
+    // loops back in order too reconfigure.
     sendSMS("RECONFIGURING...");
     device.conductivity = OFF; device.light = OFF; device.tilt = OFF; device.name = "";
     userResponse = "";
-  }//while
+  }
+
+  // process timeout.
   sendSMS("S"+ String(device.ID) +" configuration canceled. Proccess timed out.");
   return device;
-}//function
+}
 
 
 
-/*  Pushes the config made by the user and returns 
-    message to send to user by SMS.               */
+// Creates message with the current device config.
 String CurrConfig (Sensor device) {
   String message;
+
+  // create config message.
   message = ("S"+ String(device.ID) 
             +" CURRENT SENSOR CONFIG:\n----- Config -----\nInstall Address: "+ device.name 
             +"\nTilt Sensor = "+ (device.tilt ? "ON" : "OFF") 
@@ -485,8 +494,11 @@ String CurrConfig (Sensor device) {
 }
 
 
+
+// Creates message with the current device state.
 String CurrState (Sensor device) {
 
+  // returns device state in a string form.
   switch(Message.State){
     case NullState: return "Null State";
     case Asleep:  return "Asleep";
@@ -513,7 +525,7 @@ Sensor AlarmOn (Sensor device) {
     return device;
   }
 
-  // beginning arming process.
+  // begin arming process.
   sendSMS("Arming s"+ String(device.ID) +". This may take a few moments.");
   device.status = ACTIVE;
   device.state = Armed;
@@ -526,7 +538,7 @@ Sensor AlarmOn (Sensor device) {
   }
   delay(5000);
 
-  // look for sensor response.
+  // get device response.
   if (!getPayload(address)) {sendSMS("Failed to reach module."); return device;}
 
   // check response.
@@ -536,6 +548,7 @@ Sensor AlarmOn (Sensor device) {
       return device;
   }
 
+  // confirm to user device is armed.
   sendSMS("s"+ String(device.ID) +" is now ARMED.");
   acknowledge = false;
   return device;
@@ -547,29 +560,32 @@ Sensor AlarmOn (Sensor device) {
 Sensor Disarm (Sensor device) {
   long int timeout = 600000;
 
+  // check if device is configured.
   if (!device.configured) { 
     sendSMS("S"+ String(device.ID) +" has not been configured yet. Disarm canceled.");
     return device;
   }
 
+  // get user confirmation.
   sendSMS("----- DISARMING -----\nDevice: s"+ String(device.ID) 
          +"\nAddress: "+ device.name 
          +"\nAre you sure you would like to disarm s"+ String(device.ID) +"? (y or n)");
-
-
+  
+  // get user reply.
   unsigned long long int time = millis();
   time = time + timeout;
   while (time > millis()) {
     reply = getYN(time);
 
+    // check user reply.
     if (reply == YES) {
       device.status = INACTIVE;
-      loadPayload(device, GoToSleep);
+      loadPayload(device, GoToSleep);                                               // put device too sleep.
       if (!(sendPayload(address))) {
         sendSMS("Failed to communicate with the device. Disarm canceled.");
         return device;
       }
-      while (!(getPayload(address)));
+      while (!(getPayload(address)));                                               // check for proper response.
       switch (Message.State) {
         case Asleep:
           break;
@@ -578,18 +594,18 @@ Sensor Disarm (Sensor device) {
           return device;
       }
 
-      // TELL SENSOR MODULE TOO DISARM.
+      // confirm too user device disarmed.
       sendSMS("s"+ String(device.ID) +" disarmed.");
       break;
     }
 
     else if (reply == NO) {
       sendSMS("Disarm canceled");
-      break;
+      break;                                                                        // cancel disarm process.
     }
 
     else if (reply == NOREPLY) {
-      sendSMS("Process timed out. Disarm canceled.");
+      sendSMS("Process timed out. Disarm canceled.");                               // process timeout.
       break;
     }
   }
@@ -599,7 +615,7 @@ Sensor Disarm (Sensor device) {
 
 
 
-/*Gives all devices an ID*/ 
+// Gives all devices an ID
 void setDeviceID () {
   for (int i = 0; i <= 3; i++) {
     device[i].ID = i+1;
@@ -608,18 +624,21 @@ void setDeviceID () {
 }
 
 
-
+// Gets date/time from Maduino board.
 String getDateTime () {
   String date = "";
 
+  // send get date command.
   date = sendCMD("AT+CCLK?", 1000, DEBUG);
   delay(100);
 
+  // check for error response.
   if (date.indexOf("ERROR") != -1) {
     SerialUSB.println("ERROR GETTING DATE!");
     return "";
   }
 
+  // 
   int first = date.indexOf("\"");
   int last = date.indexOf("\"");
   date.remove(0, first+1);
