@@ -287,18 +287,18 @@ boolean checkSMS(String message, int slot, boolean debug) {
     sendSMS("Are you sure you would like to change the phone number too: "+ new_phone_number);
 
     // user has 10 minutes to respond before process times out.
-    String response = getYN(600000);
-    if (response.equals("NORESPONSE")) {sendSMS("Process timed out. Changenum canceled."); return false;}
+    int response = getYN(600000);
+    if (response == NOREPLY) {sendSMS("Process timed out. Changenum canceled."); return false;}
 
     // user response check.
-    if (response.equals("y")) {
+    if (response == YES) {
       sendSMS("Phone number changed.");
       phoneNum = new_phone_number;
       SerialUSB.println(phoneNum);
       Help(debug);
       return true;
     } 
-    else if (response.equals("n")) { 
+    else if (response == NO) { 
       sendSMS("Changenum canceled."); return true;
     }
   }
@@ -306,7 +306,6 @@ boolean checkSMS(String message, int slot, boolean debug) {
   // non command message catch.
   else {
     if(debug) SerialUSB.println("NOT AN OPTION");
-
     message.trim();
     sendSMS("\""+ message +"\" is not a known command. Please type \"help\" for a list of commands.");    
     return false;
@@ -342,7 +341,6 @@ void Status (Sensor device) {
 
 /**/
 Sensor ChangeConfig (Sensor device) {
-  String message;
   String userResponse = "";
   const int timeout = 600000;
   long int time = millis();
@@ -356,11 +354,11 @@ Sensor ChangeConfig (Sensor device) {
     sendSMS(CurrConfig(device));
     
     // function timeout.
-    userResponse = getYN(time);
-    if (userResponse.equals("NORESPONSE")) loop = 0;
+    reply = getYN(time);
+    if (reply == NOREPLY) loop = 0;
 
     // wipe device database.
-    else if (userResponse.equals("y")) { 
+    else if (reply == YES) { 
       device.conductivity = OFF; 
       device.light = OFF; 
       device.tilt = OFF; 
@@ -368,12 +366,11 @@ Sensor ChangeConfig (Sensor device) {
       device.configured = 0;
     }
 
-    else if (userResponse.equals("n")) {
+    else if (reply == NO) {
       sendSMS("S"+ String(device.ID) +" configuration canceled.");
       return device;
     }
   }
-  userResponse = "";
 
   // device configuration process.
   while (time > millis() || loop) {
@@ -387,38 +384,38 @@ Sensor ChangeConfig (Sensor device) {
     device.name = userResponse;
 
     sendSMS("Activate TILT SENSOR? y/n");
-    userResponse = getYN(time);
-    if (userResponse.equals("NORESPONSE")) break;
+    reply = getYN(time);
+    if (reply == NOREPLY) break;
 
-    if (userResponse.indexOf("y") == 0) device.tilt = ON;
+    if (reply == YES) device.tilt = ON;
     sendSMS("OK.");                                                          //THIS "OK" STUFF MIGHT NEED TO CHANGE!
     delay(100);
     
     sendSMS("Activate LIGHT SENSOR? y/n");
-    userResponse = getYN(time);
-    if (userResponse.equals("NORESPONSE")) break;
+    reply = getYN(time);
+    if (reply == NOREPLY) break;
     
-    if (userResponse.equals("y")) device.light = ON;
+    if (reply == YES) device.light = ON;
     sendSMS("OK.");
     delay(100);
 
     sendSMS("Activate CONDUCTIVITY SENSOR? y/n");
-    userResponse = getYN(time);
-    if (userResponse.equals("NORESPONSE")) break;
+    reply = getYN(time);
+    if (reply == NOREPLY) break;
 
-    if (userResponse.equals("y")) device.conductivity = ON;
+    if (reply == YES) device.conductivity = ON;
     sendSMS("OK.");
     delay(100);
 
     sendSMS(CurrConfig(device));
 
     sendSMS("Would you like to make any changes? y/n");
-    userResponse = getYN(time);
-    if (userResponse.equals("NORESPONSE")) break;
+    reply = getYN(time);
+    if (reply == NOREPLY) break;
 
 
     // configure sensor.
-    if (userResponse.equals("n")) {
+    if (reply == NO) {
       sendSMS("S"+ String(device.ID) +" Configuration Saved. Pushing configuration, this may take a moment.");
 
       // send parms too sensor.
@@ -512,7 +509,6 @@ String CurrState (Sensor device) {
 
 // Arms sensor module.
 Sensor AlarmOn (Sensor device) {
-  String message;
 
   // check if device is not configured.
   if (!device.configured) {
@@ -568,9 +564,9 @@ Sensor Disarm (Sensor device) {
   unsigned long long int time = millis();
   time = time + timeout;
   while (time > millis()) {
-    message = getYN(time);
+    reply = getYN(time);
 
-    if (message.equals("y")) {
+    if (reply == YES) {
       device.status = INACTIVE;
       loadPayload(device, GoToSleep);
       if (!(sendPayload(address))) {
@@ -591,12 +587,12 @@ Sensor Disarm (Sensor device) {
       break;
     }
 
-    else if (message.equals("n")) {
+    else if (reply == NO) {
       sendSMS("Disarm canceled");
       break;
     }
 
-    else if (message.equals("NORESPONSE")) {
+    else if (reply == NOREPLY) {
       sendSMS("Process timed out. Disarm canceled.");
       break;
     }
@@ -659,8 +655,7 @@ int getID (String message, boolean debug) {
 
 
 
-String getYN (int time) {
-  int x = 1;
+int getYN (unsigned long int time) {
   String response = "";
 
   while (time > millis()) {
@@ -669,9 +664,9 @@ String getYN (int time) {
 
     if (response.equals("")) continue;
 
-    else if (response.indexOf("y") == 0) return "y";
+    else if (response.indexOf("y") == 0) return YES;
 
-    else if (response.indexOf("n") == 0) return "n";
+    else if (response.indexOf("n") == 0) return NO;
 
     else {
       sendSMS("That is not an option. Please type either \"y\" or \"n\"");
@@ -680,7 +675,7 @@ String getYN (int time) {
 
   delay(1);
   }
-  return "NORESPONSE";
+  return NOREPLY;
 }
 
 

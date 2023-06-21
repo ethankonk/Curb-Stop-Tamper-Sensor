@@ -26,6 +26,12 @@
 #define AmSilent 9
 #define CantArm 10
 
+// constants for user responses.
+#define NO 0
+#define YES 1
+#define NOREPLY 2
+inline int reply;
+
 #include <string.h>
 #include <stdio.h>
 #include <Arduino.h>
@@ -57,7 +63,6 @@ inline Sensor device[4];
 String readSMS(const int timeout, int slot);
 String updateSMS(int mode);
 String sendCMD(String cmd, const int timeout, boolean debug);
-String getYN(int time);
 String getDateTime();
 String CurrConfig(Sensor device);
 String CurrState(Sensor device);
@@ -69,6 +74,7 @@ Sensor storeStatus(Sensor device);
 boolean checkSMS(String message, int slot, boolean debug);
 boolean sendSMS(String message);
 int getID(String message, boolean debug);
+int getYN(unsigned long int time);
 void clearSMS();
 void Status(Sensor device);
 void Help(boolean debug);
