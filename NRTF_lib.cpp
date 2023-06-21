@@ -6,6 +6,9 @@
 #include "sim7600_lib.h"
 #include "NRTF_lib.h"
 
+
+
+// receives payload from specified address.
 boolean getPayload(const byte address[6]){
 
   if(radio.available() > 0){
@@ -37,6 +40,7 @@ boolean getPayload(const byte address[6]){
 
 
 
+// send payload too radio device at specified address
 boolean sendPayload(const byte address[6]){
   boolean SentOk = false;
   int Retry = 0;
@@ -63,8 +67,8 @@ boolean sendPayload(const byte address[6]){
 }
 
 
-
-void DumpDatabase(Sensor device) { // debug tool
+// debug tool
+void DumpDatabase(Sensor device) { 
   SerialUSB.println("------------  Database -------------");
   //Serial.print("Current State = ");Serial.println(CurrentState);
   SerialUSB.print("NodeID ="); SerialUSB.print(payload.NodeID);SerialUSB.println(device.ID);
@@ -83,7 +87,7 @@ void DumpDatabase(Sensor device) { // debug tool
 }
 
 
-
+// radio configuration.
 boolean configureRadio(const byte address[6]){
   if(!radio.begin(&rfSPI)){
     SerialUSB.println("Radio failed to start");
@@ -91,6 +95,7 @@ boolean configureRadio(const byte address[6]){
     }
   radio.setDataRate(RF24_1MBPS);                 // set high data rate for longer distance.
   radio.setPALevel(RF24_PA_MAX);
+  radio.setRetries(4, 10);                       // set time between retries and max no. of retries
   radio.openReadingPipe(0, address);
   radio.openWritingPipe(address);
 
