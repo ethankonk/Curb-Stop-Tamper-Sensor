@@ -123,17 +123,24 @@ void loadPayload(Sensor device, byte message_type){
 
 
 
-//
+// CHANGE SO THAT RETRY LOOP COVERS ALL ERRORS
 boolean PushConfig (Sensor device) {
 
   // push config too the device.
   loadPayload(device, LoadParms);
-
-  int retry = 0;
+  int retry = 1;
+  while (retry < 6) {
     if (!sendPayload(address)) {
-      sendSMS("Failed to load config. Retrying...");
-      while(1); 
+      sendSMS("Failed to load config. Retrying... ("+ String(retry) +")");
+      retry++;
+      continue;  
     }
+    break;
+  }
+  if (retry == 6) {
+    sendSMS("Could not reach device. Configuration canceled, Config Saved.");
+    return false;
+  }
 
   delay(5000);
   
