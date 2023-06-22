@@ -120,7 +120,7 @@ void loop() {
     (device[0].timeout) ++;
   }
 
-  if ((device[0].state == Alarming))
+  if ((device[0].state == Alarming) || Message.Mode == Alarming)
     Alarm(device[0]);
   //}
 
