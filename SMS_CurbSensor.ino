@@ -105,7 +105,7 @@ void loop() {
   updateSMS(0);
 
   //for(int i=0; i<3; i++){
-  if (device[0].configured) {
+  if (device[0].configured == CONFIG_PUSHED) {
     if (getPayload(address)) {
       device[0] = storeStatus(device[0]);
       device[0].timeout = 0;
