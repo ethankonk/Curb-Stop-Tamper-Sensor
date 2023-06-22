@@ -12,6 +12,10 @@ Water Curb Box Sensor
 - hardware bult on Maduino SIM7600A chip
 */
 
+// ADMIN CMD:
+// quickconfig
+// changenum
+
 // digital pin assignments
 #define DTR_PIN 9
 #define RI_PIN 8

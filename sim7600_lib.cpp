@@ -190,7 +190,7 @@ String sendCMD (String cmd, const int timeout) {
       }//while
     }//while
 
-    if (DEBUG) SerialUSB.print("Sending command: "+ cmd);                           // prints response to command. for debugging.
+    if (DEBUG) SerialUSB.println("Sending command: "+ cmd);                           // prints response to command. for debugging.
 
     return serial;                                                // returns SIM7600 response for debugging. will change too true false maybe.
 }
@@ -259,20 +259,22 @@ boolean checkSMS(String message, int slot, boolean debug) {
       message = "";
       if (DEBUG) SerialUSB.println("SENDING QUICKCONFIG");
 
-      // get device address.
-      sendSMS("What is the devices address?");
-      while (message.equals("")) message = updateSMS(1);
-      device[ID].name = message;
-
       // get device config.
-      sendSMS("Please send the desired configuration.");
       unsigned long int time = millis();
       time = time + 600000;
       while(millis() < time){
+        // get device address.
+        sendSMS("What is the devices address?");
+        while (message.equals("")) message = updateSMS(1);
+        message.trim();
+        device[ID].name = message;
+
+        // get device configuration.
         message = "";
+        sendSMS("Please send the desired configuration.");
         while (message.equals("")) message = updateSMS(1);
         
-        if (message.length() > 3) {
+        if (message.length() > 4) {
           sendSMS("Invalid config format. Please only send 3 digits comprised of 1 and 0. Ex: 110 for TILT on, LIGHT on, CONDUCTIVITY off.");
           continue;
         }
@@ -290,10 +292,12 @@ boolean checkSMS(String message, int slot, boolean debug) {
               else if (i == 1) device[ID].light = OFF;
               else if (i == 2) device[ID].tilt = OFF;
           }
+          config /= 10;
         }
+
+        // send confirmation to user.
         sendSMS(CurrConfig(device[ID]));
         sendSMS("Would you like to make any changes? y/n");
-
         reply = getYN(time);
         if (reply == NOREPLY) {
           sendSMS("Process timed out. Quickconfig canceled.");
