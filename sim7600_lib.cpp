@@ -256,6 +256,7 @@ boolean checkSMS(String message, int slot, boolean debug) {
 
     // check for "quickconfig" cmd. debuging tool.
     else if (message.indexOf("quickconfig") == 0) {
+      message = "";
       if (DEBUG) SerialUSB.println("SENDING QUICKCONFIG");
 
       // get device address.
@@ -268,6 +269,7 @@ boolean checkSMS(String message, int slot, boolean debug) {
       unsigned long int time = millis();
       time = time + 600000;
       while(millis() < time){
+        message = "";
         while (message.equals("")) message = updateSMS(1);
         
         if (message.length() > 3) {
@@ -310,46 +312,8 @@ boolean checkSMS(String message, int slot, boolean debug) {
       }
 
       // push config to device.
-      loadPayload(device[ID], LoadParms);
+      if (!PushConfig(device[ID])) return false; 
 
-      int retry = 0;
-        if (!sendPayload(address)) {
-          sendSMS("Failed to load config. Retrying...");
-          while(1); 
-        }
-
-      delay(5000);
-      
-      // put device to sleep.
-      loadPayload(device[ID], GoToSleep);
-      if (!sendPayload(address)) {
-        sendSMS("Failed to load config.");
-        return device;  
-      }
-
-      radio.flush_rx();
-      // check for succesful send.
-      unsigned long int time2 = millis();
-      unsigned int timeout2 = 30000;
-      time2 = time2+timeout2;
-      while (!(getPayload(address))) {
-        if (millis()>time2) {
-          sendSMS("Radio failed to respond. Configure canceled.");
-          return device;
-        }
-      }
-
-      // check for proper reply
-      switch (Message.Mode) {
-        case WaitForCmd:
-          break;
-        case CommsFail:
-          sendSMS("Failed to arm. Could not communicate with the device.");
-          return device;
-        case CantArm:
-          sendSMS("Failed to arm. Make sure sensors are not activated while arming.");
-          return device;
-      }
       delay(5000);
       sendSMS("Config pushed succesfully!");
 
@@ -451,7 +415,7 @@ Sensor ChangeConfig (Sensor device) {
   time = time + timeout;
 
   // process for device that is already configured.
-  if (device.configured == CONFIG_NONE) {
+  if (device.configured == CONFIG_PUSHED) {
     sendSMS("This device has already been configured. Would you like too wipe the current configuration and reconfigure? y/n");
     sendSMS(CurrConfig(device));
     
@@ -476,13 +440,16 @@ Sensor ChangeConfig (Sensor device) {
   
   // process for device that has configuration saved.
   else if (device.configured == CONFIG_SAVED) {
-    sendSMS("A config has been made for this device. Would you like push it to s"+ String(device.ID)) +" ? y/n");
+    sendSMS("A config has been made for this device. Would you like push it to s"+ String(device.ID) +" ? y/n");
     reply = getYN(time);
     switch (reply) {
       case YES:
-
+        if(!PushConfig(device)) return device;
       case NO:
+        break;
       case NOREPLY:
+        sendSMS("S"+ String(device.ID) +" configuration canceled. Process timed out.");
+        return device;
     }
   }
 
@@ -533,8 +500,10 @@ Sensor ChangeConfig (Sensor device) {
     // configure sensor.
     if (reply == NO) {
       sendSMS("S"+ String(device.ID) +" Configuration Saved. Pushing configuration, this may take a moment.");
+      device.configured = CONFIG_SAVED;
 
-      
+      if (!PushConfig(device)) return device;
+
       delay(5000);
       sendSMS("Config pushed succesfully!");
 

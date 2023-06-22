@@ -60,7 +60,7 @@ inline boolean acknowledge = false;
     byte BatLevel = 0;
     String name = "";
     String datetime = "";
-    int configured = 0;
+    int configured = CONFIG_NONE;
     unsigned long int timeout = 0;
     char address[6];
   };

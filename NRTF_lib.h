@@ -79,6 +79,7 @@ boolean getPayload(const byte address[]);
 boolean sendPayload(const byte address[]);
 boolean pingRF(const byte address[]);
 boolean configureRadio(const byte address[]);
+boolean PushConfig(Sensor device);
 void loadPayload(Sensor device, byte message_type);
 void DumpDatabase(Sensor device);
 
