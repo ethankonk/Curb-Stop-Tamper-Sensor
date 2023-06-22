@@ -581,6 +581,7 @@ Sensor AlarmOn (Sensor device) {
   sendSMS("Arming s"+ String(device.ID) +". This may take a few moments.");
   device.status = ACTIVE;
   device.state = Armed;
+  radio.flush_rx();
 
   // send command to arm.
   loadPayload(device, GoToArm);
@@ -591,6 +592,8 @@ Sensor AlarmOn (Sensor device) {
   delay(5000);
 
   // get device response.
+  if (!getPayload(address)) {sendSMS("Failed to reach module."); return device;}
+  while(!(radio.available()));
   if (!getPayload(address)) {sendSMS("Failed to reach module."); return device;}
 
   // check response.
@@ -694,7 +697,7 @@ String getDateTime () {
   int first = date.indexOf("\"");
   int last = date.indexOf("\"");
   date.remove(0, first+1);
-  date.remove(last-3, 20);
+  date.remove(last-1, 20);
   date.trim();
 
   if (DEBUG) SerialUSB.println(date);
