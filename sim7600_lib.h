@@ -32,12 +32,18 @@
 #define NOREPLY 2
 inline int reply;
 
+// constants for configured modes.
+#define CONFIG_NONE 0
+#define CONFIG_SAVED 1
+#define CONFIG_PUSHED 2
+
 #include <string.h>
 #include <stdio.h>
 #include <Arduino.h>
+#include <ctype.h>
 
 // MISC. variables
-inline String phoneNum = "+15198194546";
+inline String phoneNum = "+12269357857";
 inline const int MESSAGE_WAIT_TIMEOUT = 60000;
 inline char buffer[64];                                  //For notifications
 inline boolean POOR_CONNECTION = false;
@@ -62,7 +68,7 @@ inline Sensor device[4];
 
 String readSMS(const int timeout, int slot);
 String updateSMS(int mode);
-String sendCMD(String cmd, const int timeout, boolean debug);
+String sendCMD(String cmd, const int timeout);
 String getDateTime();
 String CurrConfig(Sensor device);
 String CurrState(Sensor device);

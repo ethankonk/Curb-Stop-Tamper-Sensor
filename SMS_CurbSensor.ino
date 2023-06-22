@@ -55,7 +55,7 @@ void setup() {
 
   delay(100);
 
-  response = sendCMD("AT+CGMM", 3000, DEBUG);
+  response = sendCMD("AT+CGMM", 3000);
 
   while (response.indexOf("PB DONE") < 0 && response.indexOf("SIMCOM_SIM7600A-H") < 0) {
 
@@ -68,8 +68,8 @@ void setup() {
   }
 
   delay(1000);
-  sendCMD("AT+CMGF=1", 1000, DEBUG); // set SMS text mode
-  sendCMD("AT+CNMI=2,1,0,0,0", 1000, DEBUG); // set up notification for incoming SMS messages
+  sendCMD("AT+CMGF=1", 1000); // set SMS text mode
+  sendCMD("AT+CNMI=2,1,0,0,0", 1000); // set up notification for incoming SMS messages
 
   SerialUSB.println("Clearing Old SMS Messages...");
   clearSMS(); // clear up SMS storage

@@ -9,7 +9,7 @@ boolean sendSMS(String message){
   unsigned long int timeout = time + 10000;
   String cmd = "AT+CMGS=\"" + phoneNum + "\"";
 
-  sendCMD(cmd, 1000, DEBUG);                                                  // sends " AT+CMGS= "+12269357857" "
+  sendCMD(cmd, 1000);                                                  // sends " AT+CMGS= "+12269357857" "
   delay(100);
 
   Serial1.print(message);                                                     // print message to send to SIM7600 Serial.
@@ -109,7 +109,7 @@ void clearSMS () {
   // runs through all SMS memory slots (50).
   for (int i = 0; i <= 49; i++) {                                 
     CMD = "AT+CMGD=" + String(i);    
-    sendCMD(CMD, 10, DEBUG);
+    sendCMD(CMD, 10);
     //Serial1.println(CMD);    
     delay(1);
     
@@ -119,15 +119,12 @@ void clearSMS () {
     }//while
 
     if (serial.indexOf("ERROR") != -1) {                        // checks for errors in +CMGD cmd
-      SerialUSB.println("Failed to clear messages");
+      SerialUSB.println("Failed to clear messages.");
       return;
     }//if
     
     if (DEBUG) {                                                // prints out AT cmd responses. for debugging.
-      while (Serial1.available()) { 
-        SerialUSB.write(Serial1.read());
-        delay(1);
-      }
+      SerialUSB.println("Clearing SMS messages.");
     }
   }
 }
@@ -179,7 +176,7 @@ String updateSMS (int mode) {
 
 
 //Sends command too SIM7600 Serial
-String sendCMD (String cmd, const int timeout, boolean debug) {
+String sendCMD (String cmd, const int timeout) {
     String serial = "";
     Serial1.flush();
 
@@ -193,7 +190,7 @@ String sendCMD (String cmd, const int timeout, boolean debug) {
       }//while
     }//while
 
-    if (debug) SerialUSB.print(serial);                           // prints response to command. for debugging.
+    if (DEBUG) SerialUSB.print("Sending command: "+ cmd);                           // prints response to command. for debugging.
 
     return serial;                                                // returns SIM7600 response for debugging. will change too true false maybe.
 }
@@ -210,6 +207,7 @@ boolean checkSMS(String message, int slot, boolean debug) {
     ID = getID(message);
     if(ID == -1)
       return false;
+    ID--;
     
     // parse out ID from the message
     message.remove(0,3);                                               
@@ -218,35 +216,35 @@ boolean checkSMS(String message, int slot, boolean debug) {
     // checks for "status" cmd. 
     if (message.indexOf("status") == 0) {                              
       if(debug) SerialUSB.println("SENDING STATUS");
-      Status(device[ID-1]);                                            // gets device status.
+      Status(device[ID]);                                            // gets device status.
       return true;
     }
 
     // checks for "configure" cmd.
     else if (message.indexOf("configure") == 0) {                      
       if(debug) SerialUSB.println("SENDING CONFIGURE");
-      device[ID-1] = ChangeConfig(device[ID-1]);                       // runs through the change config process.
+      device[ID] = ChangeConfig(device[ID]);                       // runs through the change config process.
       return true;
     }      
     
     // checks for "disarm" cmd.
     else if (message.indexOf("disarm") == 0) {                         
       if(debug) SerialUSB.println("SENDING DISARM");
-      device[ID-1] = Disarm(device[ID-1]);                             // runs through device disarming process.
+      device[ID] = Disarm(device[ID]);                             // runs through device disarming process.
       return true;
     }
 
     // checks for "arm" cmd.
     else if (message.indexOf("arm") == 0) {                            
       if(debug){SerialUSB.println("SENDING ARM");}
-      device[ID-1] = AlarmOn(device[ID-1]);                            // runs through arming process.
+      device[ID] = AlarmOn(device[ID]);                            // runs through arming process.
       return true;
     }
     
     // checks for "ping" cmd.
     else if (message.indexOf("ping") == 0) {                           
-      if (!(device[ID-1].configured)) {
-        sendSMS("S"+ String(device[ID-1].ID) +" has not been configured yet. Ping canceled.");
+      if (!(device[ID].configured)) {
+        sendSMS("S"+ String(device[ID].ID) +" has not been configured yet. Ping canceled.");
         return false;
       }
       
@@ -254,6 +252,112 @@ boolean checkSMS(String message, int slot, boolean debug) {
       sendSMS("Pinging...");
       SerialUSB.println((pingRF(address) ? "Ping Success" : "Ping Failed"));
       return true;
+    }
+
+    // check for "quickconfig" cmd. debuging tool.
+    else if (message.indexOf("quickconfig") == 0) {
+      if (DEBUG) SerialUSB.println("SENDING QUICKCONFIG");
+
+      // get device address.
+      sendSMS("What is the devices address?");
+      while (message.equals("")) message = updateSMS(1);
+      device[ID].name = message;
+
+      // get device config.
+      sendSMS("Please send the desired configuration.");
+      unsigned long int time = millis();
+      time = time + 600000;
+      while(millis() < time){
+        while (message.equals("")) message = updateSMS(1);
+        
+        if (message.length() > 3) {
+          sendSMS("Invalid config format. Please only send 3 digits comprised of 1 and 0. Ex: 110 for TILT on, LIGHT on, CONDUCTIVITY off.");
+          continue;
+        }
+        int config = message.toInt();
+        for (int i = 0; i < 3; i++){
+          int c = config % 2;
+          switch (c) {
+            case 1:
+              if (i == 0) device[ID].conductivity = ON;
+              else if (i == 1) device[ID].light = ON;
+              else if (i == 2) device[ID].tilt = ON;
+              break;
+            case 0:               
+              if (i == 0) device[ID].conductivity = OFF;
+              else if (i == 1) device[ID].light = OFF;
+              else if (i == 2) device[ID].tilt = OFF;
+          }
+        }
+        sendSMS(CurrConfig(device[ID]));
+        sendSMS("Would you like to make any changes? y/n");
+
+        reply = getYN(time);
+        if (reply == NOREPLY) {
+          sendSMS("Process timed out. Quickconfig canceled.");
+          return device;
+        }
+        else if (reply == YES) {
+          sendSMS("Reconfiguring...");
+          message = "";
+          continue;
+        }
+        else if (reply == NO) {
+          sendSMS("S"+ String(device[ID].ID) +" Configuration Saved. Pushing configuration, this may take a moment.");
+          device[ID].configured = CONFIG_SAVED;
+          break;
+        }
+      }
+
+      // push config to device.
+      loadPayload(device[ID], LoadParms);
+
+      int retry = 0;
+        if (!sendPayload(address)) {
+          sendSMS("Failed to load config. Retrying...");
+          while(1); 
+        }
+
+      delay(5000);
+      
+      // put device to sleep.
+      loadPayload(device[ID], GoToSleep);
+      if (!sendPayload(address)) {
+        sendSMS("Failed to load config.");
+        return device;  
+      }
+
+      radio.flush_rx();
+      // check for succesful send.
+      unsigned long int time2 = millis();
+      unsigned int timeout2 = 30000;
+      time2 = time2+timeout2;
+      while (!(getPayload(address))) {
+        if (millis()>time2) {
+          sendSMS("Radio failed to respond. Configure canceled.");
+          return device;
+        }
+      }
+
+      // check for proper reply
+      switch (Message.Mode) {
+        case WaitForCmd:
+          break;
+        case CommsFail:
+          sendSMS("Failed to arm. Could not communicate with the device.");
+          return device;
+        case CantArm:
+          sendSMS("Failed to arm. Make sure sensors are not activated while arming.");
+          return device;
+      }
+      delay(5000);
+      sendSMS("Config pushed succesfully!");
+
+      // return to main menu.
+      sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\ns# arm\ns# ping\nhelp");
+      device[ID].configured = CONFIG_PUSHED;
+      clearSMS();                 
+      return device;
     }
 
     // catch for unknown cmd.
@@ -346,8 +450,8 @@ Sensor ChangeConfig (Sensor device) {
   int loop = 1;
   time = time + timeout;
 
-  // process for device that is already configured
-  if (device.configured) {
+  // process for device that is already configured.
+  if (device.configured == CONFIG_NONE) {
     sendSMS("This device has already been configured. Would you like too wipe the current configuration and reconfigure? y/n");
     sendSMS(CurrConfig(device));
     
@@ -367,6 +471,18 @@ Sensor ChangeConfig (Sensor device) {
     else if (reply == NO) {
       sendSMS("S"+ String(device.ID) +" configuration canceled.");
       return device;
+    }
+  }
+  
+  // process for device that has configuration saved.
+  else if (device.configured == CONFIG_SAVED) {
+    sendSMS("A config has been made for this device. Would you like push it to s"+ String(device.ID)) +" ? y/n");
+    reply = getYN(time);
+    switch (reply) {
+      case YES:
+
+      case NO:
+      case NOREPLY:
     }
   }
 
@@ -418,50 +534,13 @@ Sensor ChangeConfig (Sensor device) {
     if (reply == NO) {
       sendSMS("S"+ String(device.ID) +" Configuration Saved. Pushing configuration, this may take a moment.");
 
-      // push config too the device.
-      loadPayload(device, LoadParms);
-      if (!sendPayload(address)) {
-        sendSMS("Failed to load config.");
-        return device;  
-      }
-      delay(5000);
       
-      // put device to sleep.
-      loadPayload(device, GoToSleep);
-      if (!sendPayload(address)) {
-        sendSMS("Failed to load config.");
-        return device;  
-      }
-
-      radio.flush_rx();
-      // check for succesful send.
-      unsigned long int time2 = millis();
-      unsigned int timeout2 = 30000;
-      time2 = time2+timeout2;
-      while (!(getPayload(address))) {
-        if (millis()>time2) {
-          sendSMS("Radio failed to respond. Configure canceled.");
-          return device;
-        }
-      }
-
-      // check for proper reply
-      switch (Message.Mode) {
-        case WaitForCmd:
-          break;
-        case CommsFail:
-          sendSMS("Failed to arm. Could not communicate with the device.");
-          return device;
-        case CantArm:
-          sendSMS("Failed to arm. Make sure sensors are not activated while arming.");
-          return device;
-      }
       delay(5000);
       sendSMS("Config pushed succesfully!");
 
       // return to main menu.
       sendSMS("----- CMD List -----\ns# status\ns# configure\ns# disarm\ns# arm\ns# ping\nhelp");
-      device.configured = 1;
+      device.configured = CONFIG_PUSHED;
       clearSMS();                 
       return device;
     }
@@ -629,7 +708,7 @@ String getDateTime () {
   String date = "";
 
   // send get date command.
-  date = sendCMD("AT+CCLK?", 1000, DEBUG);
+  date = sendCMD("AT+CCLK?", 1000);
   delay(100);
 
   // check for error response.

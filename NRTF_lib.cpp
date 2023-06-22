@@ -121,6 +121,56 @@ void loadPayload(Sensor device, byte message_type){
   payload.MessageCount = 0;
 }
 
+
+
+//
+boolean PushConfig (Sensor device) {
+
+  // push config too the device.
+  loadPayload(device, LoadParms);
+
+  int retry = 0;
+    if (!sendPayload(address)) {
+      sendSMS("Failed to load config. Retrying...");
+      while(1); 
+    }
+
+  delay(5000);
+  
+  // put device to sleep.
+  loadPayload(device, GoToSleep);
+  if (!sendPayload(address)) {
+    sendSMS("Failed to load config.");
+    return false;  
+  }
+
+  radio.flush_rx();
+  // check for succesful send.
+  unsigned long int time = millis();
+  unsigned int timeout = 30000;
+  time = time+timeout;
+  while (!(getPayload(address))) {
+    if (millis()>time) {
+      sendSMS("Radio failed to respond. Configure canceled.");
+      return false;
+    }
+  }
+
+  // check for proper reply
+  switch (Message.Mode) {
+    case WaitForCmd:
+      break;
+    case CommsFail:
+      sendSMS("Failed to arm. Could not communicate with the device.");
+      return false;
+    case CantArm:
+      sendSMS("Failed to arm. Make sure sensors are not activated while arming.");
+      return false;
+  }
+  return true;
+}
+
+
 boolean pingRF(const byte address[]){
   unsigned long int time = millis();
   long int timeout = 15000;
