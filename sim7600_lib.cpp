@@ -693,7 +693,7 @@ String getDateTime () {
     return "";
   }
 
-  // parse out date.
+  // 
   int first = date.indexOf("\"");
   int last = date.indexOf("\"");
   date.remove(0, first+1);
@@ -707,17 +707,14 @@ String getDateTime () {
 
 
 
-// Gets the device ID the user inputed.
 int getID (String message) {
   int ID;
 
-  // parse out the ID.
   message.remove(0,1);
   message.remove(1, 20);
   SerialUSB.println("ID: "+ message);
   ID = message.toInt();
 
-  // make sure the ID inputed is within the range.
   if (1 <= ID && ID <= 4) return ID;
 
   sendSMS("s"+ String(ID) +" is not a device!");
@@ -725,25 +722,20 @@ int getID (String message) {
 }
 
 
-// Processes the yes or no answers from the user.
+
 int getYN (unsigned long int time) {
   String userResponse = "";
 
-  // get the user's input.
   while (time > millis()) {
     userResponse = updateSMS(1);
     userResponse.toLowerCase();
 
-    // no input.
     if (userResponse.equals("")) continue;
 
-    // "y" input.
     else if (userResponse.indexOf("y") == 0) return YES;
 
-    // "n" input.
     else if (userResponse.indexOf("n") == 0) return NO;
 
-    // invalid input.
     else {
       sendSMS("That is not an option. Please type either \"y\" or \"n\"");
       Serial1.flush();
@@ -751,35 +743,29 @@ int getYN (unsigned long int time) {
 
   delay(1);
   }
-  // timeout (no input).
   return NOREPLY;
 }
 
 
 
-// Prints out the list of commands available.
 void Help (boolean debug) {
   sendSMS("----- Help List -----");  
   sendSMS("Command Type: status\n USAGE EXAMPLE: s# status");
   sendSMS("Command Type: configure\n USAGE EXAMPLE: s# configure");
   sendSMS("Command Type: disarm\n USAGE EXAMPLE: s# disarm");
-  sendSMS("Command Type: arm\n  Usage EXAMPLE: s# arm");
-  sendSMS("Command Type: ping\n USAGE EXAMPLE: s# ping")
+  sendSMS("Command Type: arm\n  Usage Example: s# arm");
   sendSMS("Type \"help\" if you ever need this list of commands again.");
 }
 
 
 
-// Sends alarm messages to user's phone when tampering is detected.
 void Alarm (Sensor device) {
+  int count = 1800000;                                        // starts at 10 min so that the first alert goes through.
   int loops = 0;                                              // 3 alerts go out, counts the amount of loops Alarm goes through.
-  unsigned long int time = millis();
   
-  // sends alarm messages until the user acknowledges the alarm or 3 messages have been sent.
+
   while (!(acknowledge) && loops < 3) {
     count++;
-
-    // check for user acknowledgement.
     if (updateSMS(1) != "") {
       SerialUSB.println("Acknowledgement Received");
       sendSMS("ALERT ACKNOWLEDGED.");
@@ -789,8 +775,7 @@ void Alarm (Sensor device) {
       return;
     }
 
-    // sends an alarm message every 10 minutes (1800000 milliseconds ish).
-    if (millis() > time) {
+    if (count >= 1800000) {
       sendSMS("<<ALERT>>\nDevice ID: "+ String(device.ID) + " has been tampered with!");
       sendSMS("Install Address: "+ device.name 
              +"\nSensors Triggered:\n"
@@ -801,7 +786,7 @@ void Alarm (Sensor device) {
              +"\nDevice Status: "
              +((device.status==ACTIVE) ? "ACTIVE" : "INACTIVE"));
       sendSMS("To stop alerts please type \"OK\"");
-      time += 1800000;
+      count = 0;
       loops++;
     }
   delay(1);
